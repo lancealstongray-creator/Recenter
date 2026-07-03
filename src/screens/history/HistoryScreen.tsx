@@ -52,7 +52,9 @@ export function HistoryScreen() {
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text style={styles.title}>Your History</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          Your History
+        </Text>
         <Text style={styles.subtitle}>A record of the moments you've chosen to show up for yourself.</Text>
       </View>
 
@@ -120,12 +122,12 @@ function HistoryRow({ row }: { row: DayRow }) {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: spacing.lg,
-    marginBottom: spacing.lg,
+    paddingTop: spacing.xl,
+    marginBottom: spacing.xl,
   },
   title: {
     ...typography.display,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   subtitle: {
     ...typography.bodyMuted,
@@ -133,8 +135,8 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
+    padding: spacing.xl,
+    marginBottom: spacing.xl,
   },
   summaryHeadline: {
     ...typography.title,
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   areaChip: {
     backgroundColor: colors.accentSoft,
@@ -161,21 +163,20 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   sectionHeader: {
-    ...typography.caption,
+    ...typography.label,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
   },
   row: {
     backgroundColor: colors.surface,
     borderRadius: radii.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     gap: spacing.xs,
   },
   rowDate: {
-    ...typography.caption,
+    ...typography.label,
     marginBottom: spacing.xs,
   },
   rowSection: {

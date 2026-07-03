@@ -1,8 +1,10 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from './ScreenContainer';
 import { ProgressDots } from './ProgressDots';
 import { PrimaryButton } from './PrimaryButton';
+import { StepFade } from './StepFade';
 import { colors, spacing, typography } from '../theme/theme';
 
 interface Props {
@@ -37,18 +39,32 @@ export function FlowLayout({
   return (
     <ScreenContainer>
       <View style={styles.topRow}>
-        <Pressable onPress={onClose} hitSlop={12} style={styles.closeButton}>
-          <Text style={styles.closeGlyph}>✕</Text>
+        <Pressable
+          onPress={onClose}
+          hitSlop={12}
+          style={styles.closeButton}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
+          <Ionicons name="close" size={20} color={colors.textTertiary} />
         </Pressable>
         <ProgressDots total={totalSteps} current={step} />
         <View style={styles.closeSpacer} />
       </View>
-      <View style={styles.body}>
-        {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text style={styles.title}>{title}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        {children ? <View style={styles.extra}>{children}</View> : null}
-      </View>
+      <StepFade stepKey={step}>
+        <View style={styles.body}>
+          {eyebrow ? (
+            <Text style={styles.eyebrow} accessibilityElementsHidden>
+              {eyebrow}
+            </Text>
+          ) : null}
+          <Text style={styles.title} accessibilityRole="header">
+            {title}
+          </Text>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          {children ? <View style={styles.extra}>{children}</View> : null}
+        </View>
+      </StepFade>
       <View style={styles.footer}>
         {showBack ? (
           <PrimaryButton label="Back" variant="secondary" onPress={onBack ?? (() => {})} style={styles.backButton} />
@@ -61,29 +77,27 @@ export function FlowLayout({
 
 const styles = StyleSheet.create({
   topRow: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   closeButton: {
-    width: 28,
+    width: 44,
+    height: 44,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   closeSpacer: {
-    width: 28,
-  },
-  closeGlyph: {
-    fontSize: 16,
-    color: colors.textTertiary,
+    width: 44,
   },
   body: {
     flex: 1,
   },
   eyebrow: {
-    ...typography.caption,
+    ...typography.label,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
   title: {
@@ -94,12 +108,12 @@ const styles = StyleSheet.create({
     ...typography.bodyMuted,
   },
   extra: {
-    marginTop: spacing.xl,
+    marginTop: spacing.xxl,
   },
   footer: {
     flexDirection: 'row',
     gap: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   backButton: {
     flex: 0,

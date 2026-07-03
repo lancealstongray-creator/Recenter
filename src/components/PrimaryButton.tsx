@@ -17,6 +17,9 @@ export function PrimaryButton({ label, onPress, disabled, loading, variant = 'pr
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled || loading }}
       style={({ pressed }) => [
         styles.base,
         isSecondary ? styles.secondary : styles.primary,
@@ -37,17 +40,17 @@ export function PrimaryButton({ label, onPress, disabled, loading, variant = 'pr
 const styles = StyleSheet.create({
   base: {
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 52,
+    minHeight: 56,
   },
   primary: {
     backgroundColor: colors.accent,
   },
   secondary: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -60,6 +63,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
+    letterSpacing: 0.2,
   },
   labelPrimary: {
     color: colors.white,

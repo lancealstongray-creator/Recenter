@@ -14,6 +14,10 @@ export function SelectChip({ label, icon, selected, onPress }: Props) {
     <Pressable
       onPress={onPress}
       style={[styles.chip, selected ? styles.chipSelected : styles.chipUnselected]}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
+      hitSlop={4}
     >
       {icon ? <Text style={styles.icon}>{icon}</Text> : null}
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
@@ -25,7 +29,8 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm + 2,
+    minHeight: 44,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radii.pill,
     borderWidth: 1,

@@ -38,7 +38,9 @@ export function ProfileScreen() {
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
+          <Text style={styles.title} accessibilityRole="header">
+            Profile
+          </Text>
         </View>
 
         <View style={[styles.card, shadow.soft]}>
@@ -85,9 +87,9 @@ export function ProfileScreen() {
 
 const styles = StyleSheet.create({
   scroll: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.xxl,
+    gap: spacing.xl,
   },
   header: {
     marginBottom: spacing.sm,
@@ -98,12 +100,11 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
-    padding: spacing.lg,
+    padding: spacing.xl,
   },
   cardLabel: {
-    ...typography.caption,
+    ...typography.label,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
     marginBottom: spacing.md,
   },
   input: {
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md,
   },
   wrap: {
     flexDirection: 'row',
@@ -123,6 +124,6 @@ const styles = StyleSheet.create({
     ...typography.bodyMuted,
   },
   resetButton: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
 });

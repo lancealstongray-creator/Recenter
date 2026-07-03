@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { ScreenContainer } from './ScreenContainer';
 import { ProgressDots } from './ProgressDots';
 import { PrimaryButton } from './PrimaryButton';
-import { colors, spacing, typography } from '../theme/theme';
+import { StepFade } from './StepFade';
+import { spacing, typography } from '../theme/theme';
 
 interface Props {
   step: number; // 0-indexed
@@ -37,12 +38,20 @@ export function OnboardingLayout({
       <View style={styles.topRow}>
         <ProgressDots total={totalSteps} current={step} />
       </View>
-      <View style={styles.body}>
-        {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text style={styles.title}>{title}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        {children ? <View style={styles.extra}>{children}</View> : null}
-      </View>
+      <StepFade stepKey={step}>
+        <View style={styles.body}>
+          {eyebrow ? (
+            <Text style={styles.eyebrow} accessibilityElementsHidden>
+              {eyebrow}
+            </Text>
+          ) : null}
+          <Text style={styles.title} accessibilityRole="header">
+            {title}
+          </Text>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          {children ? <View style={styles.extra}>{children}</View> : null}
+        </View>
+      </StepFade>
       <View style={styles.footer}>
         {showBack ? (
           <PrimaryButton label="Back" variant="secondary" onPress={onBack ?? (() => {})} style={styles.backButton} />
@@ -55,16 +64,15 @@ export function OnboardingLayout({
 
 const styles = StyleSheet.create({
   topRow: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   body: {
     flex: 1,
   },
   eyebrow: {
-    ...typography.caption,
+    ...typography.label,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
   title: {
@@ -75,12 +83,12 @@ const styles = StyleSheet.create({
     ...typography.bodyMuted,
   },
   extra: {
-    marginTop: spacing.xl,
+    marginTop: spacing.xxl,
   },
   footer: {
     flexDirection: 'row',
     gap: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   backButton: {
     flex: 0,
