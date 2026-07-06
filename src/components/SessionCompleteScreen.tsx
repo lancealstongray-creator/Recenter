@@ -4,7 +4,7 @@ import { ScreenContainer } from './ScreenContainer';
 import { PrimaryButton } from './PrimaryButton';
 import { ArrivalMark } from './ArrivalMark';
 import { QuietReveal } from './QuietReveal';
-import { colors, spacing, typography } from '../theme/theme';
+import { colors, radii, spacing, typography } from '../theme/theme';
 
 interface Props {
   onReturnHome: () => void;
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.surfaceMuted,
-    borderRadius: 18,
+    borderRadius: radii.md,
     padding: spacing.lg,
     maxWidth: 320,
   },
