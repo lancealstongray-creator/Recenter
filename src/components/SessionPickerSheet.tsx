@@ -49,7 +49,9 @@ export function SessionPickerSheet({ visible, onClose, onSelect }: Props) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(43, 42, 38, 0.3)',
+    // colors.textPrimary at ~30% opacity (8-digit hex alpha) — reuses
+    // the existing token instead of a separate hand-picked rgba value.
+    backgroundColor: `${colors.textPrimary}4D`,
   },
   sheet: {
     backgroundColor: colors.surface,
