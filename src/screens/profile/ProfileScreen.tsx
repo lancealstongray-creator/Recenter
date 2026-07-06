@@ -12,7 +12,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { LIFE_AREAS } from '../../constants/lifeAreas';
 import { FAITH_PREFERENCES } from '../../constants/faithPreferences';
 import { FaithPreference } from '../../types';
-import { colors, radii, spacing, typography, shadow } from '../../theme/theme';
+import { colors, radii, spacing, typography, elevation } from '../../theme/theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Profile'>,
@@ -59,7 +59,7 @@ export function ProfileScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
+        <View style={[styles.card, elevation.soft]}>
           <Text style={styles.cardLabel}>Your name</Text>
           <TextInput
             style={styles.input}
@@ -71,7 +71,7 @@ export function ProfileScreen({ navigation }: Props) {
           />
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
+        <View style={[styles.card, elevation.soft]}>
           <Text style={styles.cardLabel}>Life areas that matter to you</Text>
           <View style={styles.wrap}>
             {LIFE_AREAS.map((area) => (
@@ -86,7 +86,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
+        <View style={[styles.card, elevation.soft]}>
           <Text style={styles.cardLabel}>Faith-based encouragement</Text>
           <View style={styles.list}>
             {FAITH_PREFERENCES.map((option) => (
@@ -100,7 +100,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
+        <View style={[styles.card, elevation.soft]}>
           <Text style={styles.cardLabel}>About Recenter</Text>
           <Text style={styles.aboutText}>
             Recenter is a quiet daily practice — never a performance. There are no streaks, no
@@ -109,7 +109,7 @@ export function ProfileScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
+        <View style={[styles.card, elevation.soft]}>
           <Text style={styles.cardLabel}>Help</Text>
           <Text style={styles.aboutText}>Take a quick, optional look around the app.</Text>
           <PrimaryButton
@@ -120,7 +120,9 @@ export function ProfileScreen({ navigation }: Props) {
           />
         </View>
 
-        <PrimaryButton label="Reset my data" variant="secondary" onPress={handleReset} style={styles.resetButton} />
+        <View style={styles.resetZone}>
+          <PrimaryButton label="Reset my data" variant="secondary" onPress={handleReset} />
+        </View>
       </ScrollView>
     </ScreenContainer>
   );
@@ -170,7 +172,10 @@ const styles = StyleSheet.create({
   tourButton: {
     marginTop: spacing.md,
   },
-  resetButton: {
-    marginTop: spacing.xs,
+  resetZone: {
+    marginTop: spacing.xl,
+    paddingTop: spacing.xl,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
 });

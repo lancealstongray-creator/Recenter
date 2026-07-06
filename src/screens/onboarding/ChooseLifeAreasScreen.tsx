@@ -44,15 +44,19 @@ export function ChooseLifeAreasScreen({ navigation }: Props) {
       onBack={() => navigation.goBack()}
     >
       <View style={styles.wrap}>
-        {LIFE_AREAS.map((area) => (
-          <SelectChip
-            key={area.id}
-            label={area.label}
-            icon={area.icon}
-            selected={selected.includes(area.id)}
-            onPress={() => toggle(area.id)}
-          />
-        ))}
+        {LIFE_AREAS.map((area) => {
+          const isSelected = selected.includes(area.id);
+          return (
+            <SelectChip
+              key={area.id}
+              label={area.label}
+              icon={area.icon}
+              selected={isSelected}
+              onPress={() => toggle(area.id)}
+              disabled={!isSelected && selected.length >= REQUIRED_AREAS}
+            />
+          );
+        })}
       </View>
     </OnboardingLayout>
   );

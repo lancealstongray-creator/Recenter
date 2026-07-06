@@ -6,7 +6,7 @@ import { getMood } from '../../constants/moods';
 import { getLifeArea } from '../../constants/lifeAreas';
 import { formatFriendlyDate, formatMonthLabel } from '../../utils/date';
 import { DailyRecenterEntry, EveningReflectionEntry } from '../../types';
-import { colors, radii, spacing, typography, shadow } from '../../theme/theme';
+import { colors, radii, spacing, typography, elevation } from '../../theme/theme';
 
 interface DayRow {
   date: string;
@@ -53,13 +53,13 @@ export function HistoryScreen() {
     <ScreenContainer>
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
-          Your History
+          Your Journey.
         </Text>
         <Text style={styles.subtitle}>A record of the moments you've chosen to show up for yourself.</Text>
       </View>
 
       {totalDays > 0 ? (
-        <View style={[styles.summaryCard, shadow.soft]}>
+        <View style={[styles.summaryCard, elevation.soft]}>
           <Text style={styles.summaryHeadline}>
             You've recentered {totalDays} {totalDays === 1 ? 'day' : 'days'}.
           </Text>
@@ -68,7 +68,7 @@ export function HistoryScreen() {
               {topAreas.map(({ area, count }) => (
                 <View key={area!.id} style={styles.areaChip}>
                   <Text style={styles.areaChipText}>
-                    {area!.icon} {area!.label} · {count}
+                    {area!.icon} {area!.label}
                   </Text>
                 </View>
               ))}
@@ -79,7 +79,7 @@ export function HistoryScreen() {
 
       {sections.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>Your history will grow here as you Recenter each day.</Text>
+          <Text style={styles.emptyText}>Your journey will grow here as you Recenter each day.</Text>
         </View>
       ) : (
         <SectionList
@@ -100,7 +100,7 @@ function HistoryRow({ row }: { row: DayRow }) {
   const lifeArea = row.daily ? getLifeArea(row.daily.lifeAreaId) : undefined;
 
   return (
-    <View style={[styles.row, shadow.soft]}>
+    <View style={[styles.row, elevation.soft]}>
       <Text style={styles.rowDate}>{formatFriendlyDate(row.date)}</Text>
       {row.daily ? (
         <View style={styles.rowSection}>
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   rowSection: {
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   rowFocus: {
     ...typography.body,

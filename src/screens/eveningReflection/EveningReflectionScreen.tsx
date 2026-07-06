@@ -54,6 +54,7 @@ export function EveningReflectionScreen({ navigation }: Props) {
         showBack={step > 0}
         onBack={() => setStep(step - 1)}
         onClose={close}
+        backgroundColor={colors.backgroundEvening}
       >
         <TextInput
           style={styles.input}
@@ -81,6 +82,7 @@ export function EveningReflectionScreen({ navigation }: Props) {
       showBack
       onBack={() => setStep(2)}
       onClose={close}
+      backgroundColor={colors.backgroundEvening}
     >
       <TextInput
         style={styles.input}

@@ -21,6 +21,11 @@ interface AppContextValue {
   saveDailyEntry: (entry: DailyRecenterEntry) => Promise<void>;
   saveEveningEntry: (entry: EveningReflectionEntry) => Promise<void>;
   resetAllData: () => Promise<void>;
+  // Set whenever a save to local storage fails, so a screen can choose
+  // to surface it inline (error/errorSoft tokens) instead of failing
+  // silently. Cleared automatically on the next successful save.
+  errorMessage: string | null;
+  clearErrorMessage: () => void;
   // Transient (not persisted) hand-off from onboarding into the user's
   // real first Morning Session — never a simulated tutorial.
   justOnboarded: boolean;
@@ -38,13 +43,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [eveningEntries, setEveningEntries] = useState<Record<string, EveningReflectionEntry>>({});
   const [justOnboarded, setJustOnboarded] = useState(false);
   const [pendingFirstFocus, setPendingFirstFocus] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const clearErrorMessage = useCallback(() => setErrorMessage(null), []);
 
   useEffect(() => {
     (async () => {
       const [p, d, e] = await Promise.all([loadProfile(), loadDailyEntries(), loadEveningEntries()]);
-      setProfile(p);
-      setDailyEntries(d);
-      setEveningEntries(e);
+      setProfile(p.ok ? p.data : DEFAULT_PROFILE);
+      setDailyEntries(d.ok ? d.data : {});
+      setEveningEntries(e.ok ? e.data : {});
+      if (!p.ok || !d.ok || !e.ok) {
+        setErrorMessage('We had trouble loading your data. Starting fresh for now.');
+      }
       setIsLoading(false);
     })();
   }, []);
@@ -53,7 +64,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (partial: Partial<UserProfile>) => {
       const next = { ...profile, ...partial };
       setProfile(next);
-      await persistProfile(next);
+      const result = await persistProfile(next);
+      setErrorMessage(result.ok ? null : result.error);
     },
     [profile]
   );
@@ -62,7 +74,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (partial: Partial<UserProfile>) => {
       const next = { ...profile, ...partial, onboardingComplete: true, draftFocus: '' };
       setProfile(next);
-      await persistProfile(next);
+      const result = await persistProfile(next);
+      setErrorMessage(result.ok ? null : result.error);
       setPendingFirstFocus(partial.draftFocus ?? profile.draftFocus ?? '');
       setJustOnboarded(true);
     },
@@ -78,20 +91,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const saveDailyEntry = useCallback(async (entry: DailyRecenterEntry) => {
-    const next = await persistDailyEntry(entry);
-    setDailyEntries(next);
+    const result = await persistDailyEntry(entry);
+    if (result.ok) {
+      setDailyEntries(result.data);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
   }, []);
 
   const saveEveningEntry = useCallback(async (entry: EveningReflectionEntry) => {
-    const next = await persistEveningEntry(entry);
-    setEveningEntries(next);
+    const result = await persistEveningEntry(entry);
+    if (result.ok) {
+      setEveningEntries(result.data);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
   }, []);
 
   const resetAllData = useCallback(async () => {
-    await clearAllData();
-    setProfile(DEFAULT_PROFILE);
-    setDailyEntries({});
-    setEveningEntries({});
+    const result = await clearAllData();
+    if (result.ok) {
+      setProfile(DEFAULT_PROFILE);
+      setDailyEntries({});
+      setEveningEntries({});
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
   }, []);
 
   const value = useMemo(
@@ -105,6 +133,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveDailyEntry,
       saveEveningEntry,
       resetAllData,
+      errorMessage,
+      clearErrorMessage,
       justOnboarded,
       pendingFirstFocus,
       clearJustOnboarded,
@@ -120,6 +150,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveDailyEntry,
       saveEveningEntry,
       resetAllData,
+      errorMessage,
+      clearErrorMessage,
       justOnboarded,
       pendingFirstFocus,
       clearJustOnboarded,

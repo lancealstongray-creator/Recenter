@@ -18,42 +18,82 @@ export const DEFAULT_PROFILE: UserProfile = {
   hasSeenTour: false,
 };
 
-export async function loadProfile(): Promise<UserProfile> {
-  const raw = await AsyncStorage.getItem(KEYS.profile);
-  if (!raw) return DEFAULT_PROFILE;
-  return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
+export type StorageResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+function failure(err: unknown): { ok: false; error: string } {
+  return { ok: false, error: err instanceof Error ? err.message : 'Something went wrong saving that.' };
 }
 
-export async function saveProfile(profile: UserProfile): Promise<void> {
-  await AsyncStorage.setItem(KEYS.profile, JSON.stringify(profile));
+export async function loadProfile(): Promise<StorageResult<UserProfile>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.profile);
+    const data = raw ? { ...DEFAULT_PROFILE, ...JSON.parse(raw) } : DEFAULT_PROFILE;
+    return { ok: true, data };
+  } catch (err) {
+    return failure(err);
+  }
 }
 
-export async function loadDailyEntries(): Promise<Record<string, DailyRecenterEntry>> {
-  const raw = await AsyncStorage.getItem(KEYS.dailyEntries);
-  return raw ? JSON.parse(raw) : {};
+export async function saveProfile(profile: UserProfile): Promise<StorageResult<UserProfile>> {
+  try {
+    await AsyncStorage.setItem(KEYS.profile, JSON.stringify(profile));
+    return { ok: true, data: profile };
+  } catch (err) {
+    return failure(err);
+  }
 }
 
-export async function saveDailyEntry(entry: DailyRecenterEntry): Promise<Record<string, DailyRecenterEntry>> {
-  const all = await loadDailyEntries();
-  const next = { ...all, [entry.date]: entry };
-  await AsyncStorage.setItem(KEYS.dailyEntries, JSON.stringify(next));
-  return next;
+export async function loadDailyEntries(): Promise<StorageResult<Record<string, DailyRecenterEntry>>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.dailyEntries);
+    return { ok: true, data: raw ? JSON.parse(raw) : {} };
+  } catch (err) {
+    return failure(err);
+  }
 }
 
-export async function loadEveningEntries(): Promise<Record<string, EveningReflectionEntry>> {
-  const raw = await AsyncStorage.getItem(KEYS.eveningEntries);
-  return raw ? JSON.parse(raw) : {};
+export async function saveDailyEntry(
+  entry: DailyRecenterEntry
+): Promise<StorageResult<Record<string, DailyRecenterEntry>>> {
+  try {
+    const existing = await loadDailyEntries();
+    const all = existing.ok ? existing.data : {};
+    const next = { ...all, [entry.date]: entry };
+    await AsyncStorage.setItem(KEYS.dailyEntries, JSON.stringify(next));
+    return { ok: true, data: next };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
+export async function loadEveningEntries(): Promise<StorageResult<Record<string, EveningReflectionEntry>>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.eveningEntries);
+    return { ok: true, data: raw ? JSON.parse(raw) : {} };
+  } catch (err) {
+    return failure(err);
+  }
 }
 
 export async function saveEveningEntry(
   entry: EveningReflectionEntry
-): Promise<Record<string, EveningReflectionEntry>> {
-  const all = await loadEveningEntries();
-  const next = { ...all, [entry.date]: entry };
-  await AsyncStorage.setItem(KEYS.eveningEntries, JSON.stringify(next));
-  return next;
+): Promise<StorageResult<Record<string, EveningReflectionEntry>>> {
+  try {
+    const existing = await loadEveningEntries();
+    const all = existing.ok ? existing.data : {};
+    const next = { ...all, [entry.date]: entry };
+    await AsyncStorage.setItem(KEYS.eveningEntries, JSON.stringify(next));
+    return { ok: true, data: next };
+  } catch (err) {
+    return failure(err);
+  }
 }
 
-export async function clearAllData(): Promise<void> {
-  await AsyncStorage.removeMany([KEYS.profile, KEYS.dailyEntries, KEYS.eveningEntries]);
+export async function clearAllData(): Promise<StorageResult<null>> {
+  try {
+    await AsyncStorage.removeMany([KEYS.profile, KEYS.dailyEntries, KEYS.eveningEntries]);
+    return { ok: true, data: null };
+  } catch (err) {
+    return failure(err);
+  }
 }
