@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { OnboardingNavigator } from './OnboardingNavigator';
@@ -13,7 +13,18 @@ import { colors } from '../theme/theme';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { isLoading, profile } = useApp();
+  const { isLoading, profile, justOnboarded, clearJustOnboarded } = useApp();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+
+  // The moment onboarding finishes, drop straight into the user's real
+  // first Morning Session — never a simulated tutorial, never a separate
+  // celebration screen. Finishing that session returns to Home as usual.
+  useEffect(() => {
+    if (justOnboarded && navigationRef.isReady()) {
+      navigationRef.navigate('DailyRecenter');
+      clearJustOnboarded();
+    }
+  }, [justOnboarded, navigationRef, clearJustOnboarded]);
 
   if (isLoading) {
     return (
@@ -24,7 +35,7 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!profile.onboardingComplete ? (
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} />

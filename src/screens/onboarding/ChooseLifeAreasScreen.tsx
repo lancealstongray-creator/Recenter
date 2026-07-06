@@ -5,35 +5,41 @@ import { OnboardingStackParamList } from '../../navigation/types';
 import { OnboardingLayout } from '../../components/OnboardingLayout';
 import { SelectChip } from '../../components/SelectChip';
 import { LIFE_AREAS } from '../../constants/lifeAreas';
-import { useOnboardingDraft } from '../../context/OnboardingDraftContext';
+import { useApp } from '../../context/AppContext';
 import { spacing } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ChooseLifeAreas'>;
 
-const MAX_AREAS = 5;
+const REQUIRED_AREAS = 3;
 
 export function ChooseLifeAreasScreen({ navigation }: Props) {
-  const { draft, setLifeAreaIds } = useOnboardingDraft();
+  const { profile, updateProfile } = useApp();
+  const selected = profile.lifeAreaIds;
 
   function toggle(id: string) {
-    const isSelected = draft.lifeAreaIds.includes(id);
+    const isSelected = selected.includes(id);
     if (isSelected) {
-      setLifeAreaIds(draft.lifeAreaIds.filter((x) => x !== id));
-    } else if (draft.lifeAreaIds.length < MAX_AREAS) {
-      setLifeAreaIds([...draft.lifeAreaIds, id]);
+      updateProfile({ lifeAreaIds: selected.filter((x) => x !== id) });
+    } else if (selected.length < REQUIRED_AREAS) {
+      updateProfile({ lifeAreaIds: [...selected, id] });
     }
+  }
+
+  async function handleContinue() {
+    await updateProfile({ onboardingStep: 3 });
+    navigation.navigate('FaithPreference');
   }
 
   return (
     <OnboardingLayout
-      step={4}
-      totalSteps={7}
+      step={2}
+      totalSteps={6}
       eyebrow="What matters to you"
-      title="Choose a few life areas"
-      subtitle={`Pick up to ${MAX_AREAS}. We'll gently remind you of these during your Daily Recenter.`}
+      title="Choose 3 life areas"
+      subtitle="We'll gently bring these into your Daily Recenter — nothing more to configure."
       primaryLabel="Continue"
-      onPrimaryPress={() => navigation.navigate('YourName')}
-      primaryDisabled={draft.lifeAreaIds.length === 0}
+      onPrimaryPress={handleContinue}
+      primaryDisabled={selected.length !== REQUIRED_AREAS}
       showBack
       onBack={() => navigation.goBack()}
     >
@@ -43,7 +49,7 @@ export function ChooseLifeAreasScreen({ navigation }: Props) {
             key={area.id}
             label={area.label}
             icon={area.icon}
-            selected={draft.lifeAreaIds.includes(area.id)}
+            selected={selected.includes(area.id)}
             onPress={() => toggle(area.id)}
           />
         ))}
