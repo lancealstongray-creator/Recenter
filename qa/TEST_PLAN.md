@@ -114,27 +114,53 @@ Severity: **Critical** (breaks a QA rule below, ships broken), **High**
 | QA-HOME-04 | A user who has used other session types but never this one sees a "first [type] for you" variant, not the normal recurring blurb | Medium | Manual |
 | QA-HOME-05 | Begin button on the recommended card routes to the correct screen for each of the 4 session types (Morning → DailyRecenter, Midday → MiddayReset, Evening → EveningReflection, Wind Down → WindDown) | Critical | Manual |
 | QA-COMPLETE-01 | Every session type (Morning, Midday, Evening, Wind Down) ends on the shared "Nice work." completion screen with the exact spec copy | High | Manual |
-| QA-COMPLETE-02 | Completion screen's "Return Home" always lands on the Home tab regardless of which tab was active before the session started | High | Manual |
-| QA-COMPLETE-03 | Completion screen's "Done" returns to the previous screen/tab (not forced to Home) | Medium | Manual |
+| QA-COMPLETE-02 *(superseded, see QA-COMPLETE2-*)* | ~~Completion screen's "Return Home" always lands on the Home tab~~ — Session Completion v2 replaced Return Home/Done with Return to Today/Sit a Moment | — | — |
+| QA-COMPLETE-03 *(superseded, see QA-COMPLETE2-*)* | ~~Completion screen's "Done" returns to the previous screen/tab~~ — no longer exists in v2 | — | — |
 | QA-COMPLETE-04 | When a One Focus exists for today, the completion screen shows a togglable focus-complete control; toggling persists to `dailyEntries[date].focusCompleted` | High | **Automated** (persistence) — `src/context/AppContext.test.tsx`; UI toggle Manual |
 | QA-COMPLETE-05 | Completing a session immediately refreshes Home's recommendation (no stale/duplicate card, no manual refresh needed) | Critical | Manual |
 | QA-EMPTY-01 | First-time use: Home's recommended card reads "Let's begin your first moment together." | Medium | Manual (see QA-HOME-03) |
 | QA-EMPTY-02 | No One Focus selected: quiet block reads "No focus set for today" / "That's completely fine — not every day needs one." — never an error or missing-state look | High | Manual |
 | QA-EMPTY-03 | Session already completed today: that session type is skipped by the recommendation scan; if it was the only remaining type, Home shows "You've shown up for yourself today. That's enough." | Critical | **Automated** (logic) — `src/utils/adaptiveRhythms.test.ts`; UI Manual |
-| QA-EMPTY-04 | No history: Journey shows a hopeful empty state, never a blank/broken screen | Medium | Manual |
+| QA-EMPTY-04 | No history: Archived Journey shows a hopeful empty state, never a blank/broken screen | Medium | Manual |
 | QA-EMPTY-05 | Offline mode: reassuring banner ("You're offline — Recenter still works. Everything is saved on this device.") shown on Home, all features remain fully usable | Medium | Manual (web only — `useIsOffline` has no native signal without an extra native module) |
+
+## 9. Sprint 3: Navigation, Journal, Archived Journey, confidence-based recommendation, Session Completion v2
+
+| ID | Scenario | Severity | Automated? |
+|----|----------|----------|------------|
+| QA-NAV-01 | Bottom tab bar reads exactly Home (Today), Journal, Profile — History/Journey no longer appears as a tab | Critical | Manual (structural — `MainTabNavigator.tsx` only registers these 3 routes) |
+| QA-NAV-02 | Archived Journey is reachable from a link in Journal and a link in Profile, never from the tab bar, never via a push notification | High | Manual |
+| QA-JOURNAL-01 | Journal's composer is docked at the top and always visible on screen load — not a "+" button hunting for an entry point | High | Manual |
+| QA-JOURNAL-02 | Saving a Journal entry appends it to the feed (most-recent-first) with a Page Turn reveal, and does not overwrite or remove any other entry | Critical | **Automated** (persistence/append) — `src/storage/storage.test.ts`, `src/context/AppContext.test.tsx`; UI reveal Manual |
+| QA-JOURNAL-03 | Journal's feed unifies freeform entries with existing session reflections (Daily Recenter focus, Evening Reflection highlight/gratitude/challenge, Midday note, Wind Down note) in one chronological, identically-styled feed | High | Manual |
+| QA-JOURNAL-04 | The "This is a prayer" toggle only appears when `profile.faithPreference === 'yes'` — never shown otherwise | High | **Automated** (logic) — `src/context/AppContext.test.tsx` (`isPrayer` persistence); UI conditional Manual |
+| QA-JOURNAL-05 | "Private by design." appears only on genuinely first-ever use (empty feed), never again once any entry exists | Medium | Manual |
+| QA-JOURNAL-06 | Multiple Journal entries can be saved the same day without clobbering each other (array append, not keyed by date) | Critical | **Automated** — `src/storage/storage.test.ts`, `src/context/AppContext.test.tsx` |
+| QA-ARCHIVE-01 | Archived Journey groups rows by season (e.g. "Early Summer," "Winter"), never by calendar month, never showing a year in the section label | Medium | **Automated** (label logic) — `src/utils/date.test.ts`; UI grouping Manual |
+| QA-ARCHIVE-02 | Opening line reads "You've been reflecting for N months." stated once at the top, never repeated as a running counter while scrolling | Medium | **Automated** (logic) — `src/utils/date.test.ts` (`monthsSince`); UI Manual |
+| QA-ARCHIVE-03 | Life-area summary shows one representative reflection excerpt per area, never a numeric tally/count | High | Manual (structural — `HistoryScreen.tsx` renders `topAreaExcerpts`, no count field) |
+| QA-REC-01 | Today's primary card label reads "Suggested for you" only when a consistent pattern exists across the last 7 days (>= 5 matching days); otherwise shows the plain default session label | Critical | **Automated** — `src/utils/recommendation.test.ts` |
+| QA-REC-02 | A session completed earlier today never counts toward that same day's own confidence calculation | Critical | **Automated** — `src/utils/recommendation.test.ts` |
+| QA-REC-03 | A single unusual day within the rolling window does not flip confidence on or off by itself — no visible "personality change" from one day's behavior | High | **Automated** — `src/utils/recommendation.test.ts` |
+| QA-REC-04 | Confidence-based recommendation never changes *which* session type is recommended — only whether the card reads as personalized copy; `getRecommendation().sessionType` always matches `recommendSession()` | Critical | **Automated** — `src/utils/recommendation.test.ts` (asserts against `recommendSession` semantics) |
+| QA-REC-05 | "Or choose something else" opens the Session Picker listing all 4 session types as a plain choice, never a ranked/scored list | High | Manual |
+| QA-REC-06 | Selecting a session type from the Session Picker routes directly to that session's screen, bypassing the recommendation entirely | Critical | Manual |
+| QA-COMPLETE2-01 | Session Completion v2 shows two equal-weight options — "Return to Today" (filled) and "Sit a Moment" (outline) — with no auto-dismiss and no countdown | Critical | Manual |
+| QA-COMPLETE2-02 | "Sit a Moment" hides both buttons and holds the same completion view (no new screen, no timer); after a pause, a quiet "Return to Today" text link fades in | High | Manual |
+| QA-COMPLETE2-03 | The arrival card uses `elevation.hero` (e3) — the only surface in the app permitted that much lift | Medium | Manual (structural — `SessionCompleteScreen.tsx` uses `elevation.hero`) |
 
 ---
 
 ## Coverage summary
 
-- **Automated today:** 43 Jest tests across 7 suites — the data/logic layer
+- **Automated today:** 65 Jest tests across 8 suites — the data/logic layer
   where the QA rules actually live (dedup, no data loss, resume, time
-  math, flag hygiene, deterministic session recommendation).
+  math, flag hygiene, deterministic session recommendation, confidence
+  layer, season/perspective date formatting, Journal persistence).
 - **Manual today:** full-flow UI journeys (onboarding screens, session
-  screens, Journey, Profile, Tour) — see `smoke-checklist.md` and
-  `regression-checklist.md`. These are documented, not automated, because
-  component/navigation-level RN testing (mocking React Navigation,
-  AsyncStorage, and Expo font loading together) is a larger lift than this
-  stabilization pass calls for; see `qa/README.md` for the reasoning and
-  the recommended next step.
+  screens, Journal, Archived Journey, Profile, Tour) — see
+  `smoke-checklist.md` and `regression-checklist.md`. These are
+  documented, not automated, because component/navigation-level RN
+  testing (mocking React Navigation, AsyncStorage, and Expo font loading
+  together) is a larger lift than this stabilization pass calls for; see
+  `qa/README.md` for the reasoning and the recommended next step.

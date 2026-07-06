@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -107,6 +107,9 @@ export function ProfileScreen({ navigation }: Props) {
             badges, and no reminders about days you missed. Just a space to reconnect with what
             matters, whenever you're ready.
           </Text>
+          <Text style={[styles.aboutText, styles.trustLine]}>
+            Your reflections stay on this device. We designed Recenter this way on purpose.
+          </Text>
         </View>
 
         <View style={[styles.card, elevation.soft]}>
@@ -119,6 +122,14 @@ export function ProfileScreen({ navigation }: Props) {
             style={styles.tourButton}
           />
         </View>
+
+        <Pressable
+          onPress={() => navigation.navigate('ArchivedJourney')}
+          style={styles.archivedLink}
+          hitSlop={8}
+        >
+          <Text style={styles.archivedLinkText}>Archived Journey</Text>
+        </Pressable>
 
         <View style={styles.resetZone}>
           <PrimaryButton label="Reset my data" variant="secondary" onPress={handleReset} />
@@ -169,8 +180,19 @@ const styles = StyleSheet.create({
   aboutText: {
     ...typography.bodyMuted,
   },
+  trustLine: {
+    marginTop: spacing.md,
+  },
   tourButton: {
     marginTop: spacing.md,
+  },
+  archivedLink: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  archivedLinkText: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
   resetZone: {
     marginTop: spacing.xl,

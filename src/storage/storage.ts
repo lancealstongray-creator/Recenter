@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   DailyRecenterEntry,
   EveningReflectionEntry,
+  JournalEntry,
   MiddayResetEntry,
   UserProfile,
   WindDownEntry,
@@ -13,6 +14,7 @@ const KEYS = {
   eveningEntries: '@recenter/eveningEntries',
   middayEntries: '@recenter/middayEntries',
   windDownEntries: '@recenter/windDownEntries',
+  journalEntries: '@recenter/journalEntries',
 };
 
 export const DEFAULT_PROFILE: UserProfile = {
@@ -143,6 +145,27 @@ export async function saveWindDownEntry(
   }
 }
 
+export async function loadJournalEntries(): Promise<StorageResult<JournalEntry[]>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.journalEntries);
+    return { ok: true, data: raw ? JSON.parse(raw) : [] };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
+export async function addJournalEntry(entry: JournalEntry): Promise<StorageResult<JournalEntry[]>> {
+  try {
+    const existing = await loadJournalEntries();
+    const all = existing.ok ? existing.data : [];
+    const next = [...all, entry];
+    await AsyncStorage.setItem(KEYS.journalEntries, JSON.stringify(next));
+    return { ok: true, data: next };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
 export async function clearAllData(): Promise<StorageResult<null>> {
   try {
     await AsyncStorage.removeMany([
@@ -151,6 +174,7 @@ export async function clearAllData(): Promise<StorageResult<null>> {
       KEYS.eveningEntries,
       KEYS.middayEntries,
       KEYS.windDownEntries,
+      KEYS.journalEntries,
     ]);
     return { ok: true, data: null };
   } catch (err) {

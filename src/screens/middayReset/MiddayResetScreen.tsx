@@ -81,7 +81,6 @@ export function MiddayResetScreen({ navigation }: Props) {
   return (
     <SessionCompleteScreen
       onReturnHome={returnHome}
-      onDone={close}
       focus={todaysEntry?.focus || undefined}
       focusCompleted={todaysEntry?.focusCompleted}
       onToggleFocusCompleted={() => setFocusCompleted(date, !todaysEntry?.focusCompleted)}

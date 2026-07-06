@@ -53,26 +53,47 @@ single place to check "is X covered, and how?"
 | QA-HOME-04 | — | smoke-checklist.md § Home |
 | QA-HOME-05 | — | smoke-checklist.md § Home |
 | QA-COMPLETE-01 | — | smoke-checklist.md § Session completion |
-| QA-COMPLETE-02 | — | smoke-checklist.md § Session completion |
-| QA-COMPLETE-03 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE-02 | Superseded — see QA-COMPLETE2-01/02 | — |
+| QA-COMPLETE-03 | Superseded — see QA-COMPLETE2-01/02 | — |
 | QA-COMPLETE-04 | `src/context/AppContext.test.tsx` → `setFocusCompleted` persistence | smoke-checklist.md § Session completion |
 | QA-COMPLETE-05 | — | smoke-checklist.md § Session completion |
 | QA-EMPTY-01 | — | smoke-checklist.md § Home (see QA-HOME-03) |
 | QA-EMPTY-02 | — | smoke-checklist.md § Home |
 | QA-EMPTY-03 | `src/utils/adaptiveRhythms.test.ts` | smoke-checklist.md § Home |
-| QA-EMPTY-04 | — | smoke-checklist.md § Journey |
+| QA-EMPTY-04 | — | smoke-checklist.md § Journal / Archived Journey |
 | QA-EMPTY-05 | — | smoke-checklist.md § Home (web only) |
+| QA-NAV-01 | — | smoke-checklist.md § Navigation |
+| QA-NAV-02 | — | smoke-checklist.md § Navigation |
+| QA-JOURNAL-01 | — | smoke-checklist.md § Journal |
+| QA-JOURNAL-02 | `src/storage/storage.test.ts` → journal append tests; `src/context/AppContext.test.tsx` → Journal entries | smoke-checklist.md § Journal |
+| QA-JOURNAL-03 | — | smoke-checklist.md § Journal |
+| QA-JOURNAL-04 | `src/context/AppContext.test.tsx` → "marks an entry as a prayer" | smoke-checklist.md § Journal |
+| QA-JOURNAL-05 | — | smoke-checklist.md § Journal |
+| QA-JOURNAL-06 | `src/storage/storage.test.ts`, `src/context/AppContext.test.tsx` → "multiple entries can be added the same day" | regression-checklist.md § No duplicate completions |
+| QA-ARCHIVE-01 | `src/utils/date.test.ts` → `formatSeasonLabel` suite | smoke-checklist.md § Archived Journey |
+| QA-ARCHIVE-02 | `src/utils/date.test.ts` → `monthsSince` suite | smoke-checklist.md § Archived Journey |
+| QA-ARCHIVE-03 | — | smoke-checklist.md § Archived Journey |
+| QA-REC-01 | `src/utils/recommendation.test.ts` | — |
+| QA-REC-02 | `src/utils/recommendation.test.ts` → "never lets a completion earlier today count" | — |
+| QA-REC-03 | `src/utils/recommendation.test.ts` → "a single unusual day does not create or remove confidence" | — |
+| QA-REC-04 | `src/utils/recommendation.test.ts` (every case asserts `sessionType` against `recommendSession` semantics) | — |
+| QA-REC-05 | — | smoke-checklist.md § Recommended Sessions |
+| QA-REC-06 | — | smoke-checklist.md § Recommended Sessions |
+| QA-COMPLETE2-01 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE2-02 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE2-03 | — | smoke-checklist.md § Session completion (structural) |
 
 ## Automated test inventory
 
 | File | What it covers |
 |---|---|
 | `src/utils/pick.test.ts` | Deterministic daily picks (QA-TIME-06) |
-| `src/utils/date.test.ts` | Date-key formatting, midnight/year rollover, greeting boundaries (QA-TOD-01→03, QA-TIME-01→03) |
-| `src/storage/storage.test.ts` | Profile load/save/merge, daily/evening entry dedup, error-safety (QA-DATA-01→05) |
-| `src/context/AppContext.test.tsx` | Session dedup, onboarding persistence/resume, onboarding hand-off, reset, relaunch survival, focus-complete toggle (QA-ONB-06/07/09, QA-SES-02/03, QA-DATA-01/06/07, QA-COMPLETE-04) |
+| `src/utils/date.test.ts` | Date-key formatting, midnight/year rollover, greeting boundaries, season labels, months-since perspective line (QA-TOD-01→03, QA-TIME-01→03, QA-ARCHIVE-01/02) |
+| `src/storage/storage.test.ts` | Profile load/save/merge, daily/evening entry dedup, journal append, error-safety (QA-DATA-01→05, QA-JOURNAL-02/06) |
+| `src/context/AppContext.test.tsx` | Session dedup, onboarding persistence/resume, onboarding hand-off, reset, relaunch survival, focus-complete toggle, Journal entries (QA-ONB-06/07/09, QA-SES-02/03, QA-DATA-01/06/07, QA-COMPLETE-04, QA-JOURNAL-02/04/06) |
 | `src/navigation/types.test.ts` | Onboarding step-index resume mapping (QA-ONB-07) |
 | `src/flags/featureFlags.test.ts` | Phase 2/3 flags stay off (QA-GUARD-01) |
 | `src/utils/adaptiveRhythms.test.ts` | Deterministic time-window + forward-scan recommendation logic, never-recommend-missed rule, all-complete → null (QA-TOD-05/06, QA-GUARD-03/04, QA-EMPTY-03) |
+| `src/utils/recommendation.test.ts` | Confidence layer on top of Adaptive Rhythms — rolling-window pattern detection, never changes which session is recommended, never lets today count toward its own confidence (QA-REC-01→04) |
 
-Total: 7 suites, 43 tests, all passing as of the Today Experience pass.
+Total: 8 suites, 65 tests, all passing as of the Sprint 3 pass.

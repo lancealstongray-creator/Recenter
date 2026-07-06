@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { PageTurn } from '../../components/PageTurn';
 import { getMood } from '../../constants/moods';
 import { getLifeArea } from '../../constants/lifeAreas';
-import { formatFriendlyDate, formatMonthLabel } from '../../utils/date';
+import { formatFriendlyDate, formatSeasonLabel, monthsSince } from '../../utils/date';
 import { DailyRecenterEntry, EveningReflectionEntry } from '../../types';
 import { colors, radii, spacing, typography, elevation } from '../../theme/theme';
 
@@ -19,61 +20,67 @@ interface Section {
   data: DayRow[];
 }
 
+// Archived Journey reframes this same data with the opposite emotional
+// register from Today/Journal: perspective and memory, not tracking. No
+// numeric tallies anywhere — a representative excerpt per life area
+// instead, and grouped by season rather than calendar month.
 export function HistoryScreen() {
   const { dailyEntries, eveningEntries } = useApp();
 
-  const { sections, totalDays, topAreas } = useMemo(() => {
+  const { sections, totalDays, earliestDate, topAreaExcerpts } = useMemo(() => {
     const dates = new Set<string>([...Object.keys(dailyEntries), ...Object.keys(eveningEntries)]);
-    const rows: DayRow[] = Array.from(dates)
-      .sort((a, b) => (a < b ? 1 : -1))
-      .map((date) => ({ date, daily: dailyEntries[date], evening: eveningEntries[date] }));
+    const sortedDates = Array.from(dates).sort((a, b) => (a < b ? 1 : -1));
+    const rows: DayRow[] = sortedDates.map((date) => ({ date, daily: dailyEntries[date], evening: eveningEntries[date] }));
 
     const grouped = new Map<string, DayRow[]>();
     for (const row of rows) {
-      const monthLabel = formatMonthLabel(row.date);
-      if (!grouped.has(monthLabel)) grouped.set(monthLabel, []);
-      grouped.get(monthLabel)!.push(row);
+      const seasonLabel = formatSeasonLabel(row.date);
+      if (!grouped.has(seasonLabel)) grouped.set(seasonLabel, []);
+      grouped.get(seasonLabel)!.push(row);
     }
     const sections: Section[] = Array.from(grouped.entries()).map(([title, data]) => ({ title, data }));
 
-    const areaCounts = new Map<string, number>();
-    Object.values(dailyEntries).forEach((entry) => {
-      areaCounts.set(entry.lifeAreaId, (areaCounts.get(entry.lifeAreaId) ?? 0) + 1);
-    });
-    const topAreas = Array.from(areaCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([id, count]) => ({ area: getLifeArea(id), count }))
-      .filter((x) => x.area);
+    // One representative excerpt per life area (most recent focus for
+    // that area, since focus is the only reflection text tied to it),
+    // never a count.
+    const excerptByArea = new Map<string, { date: string; excerpt: string }>();
+    for (const entry of Object.values(dailyEntries)) {
+      if (!entry.focus) continue;
+      const existing = excerptByArea.get(entry.lifeAreaId);
+      if (!existing || entry.date > existing.date) {
+        excerptByArea.set(entry.lifeAreaId, { date: entry.date, excerpt: entry.focus });
+      }
+    }
+    const topAreaExcerpts = Array.from(excerptByArea.entries())
+      .map(([id, { excerpt }]) => ({ area: getLifeArea(id), excerpt }))
+      .filter((x) => x.area)
+      .slice(0, 3);
 
-    return { sections, totalDays: rows.length, topAreas };
+    const earliestDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+
+    return { sections, totalDays: rows.length, earliestDate, topAreaExcerpts };
   }, [dailyEntries, eveningEntries]);
 
   return (
     <ScreenContainer>
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
-          Your Journey.
+          Archived Journey
         </Text>
-        <Text style={styles.subtitle}>A record of the moments you've chosen to show up for yourself.</Text>
+        {earliestDate ? (
+          <Text style={styles.subtitle}>You've been reflecting for {monthsSince(earliestDate)}.</Text>
+        ) : (
+          <Text style={styles.subtitle}>A quiet record of the moments you've shown up for yourself.</Text>
+        )}
       </View>
 
-      {totalDays > 0 ? (
+      {totalDays > 0 && topAreaExcerpts.length > 0 ? (
         <View style={[styles.summaryCard, elevation.soft]}>
-          <Text style={styles.summaryHeadline}>
-            You've recentered {totalDays} {totalDays === 1 ? 'day' : 'days'}.
-          </Text>
-          {topAreas.length > 0 ? (
-            <View style={styles.areaRow}>
-              {topAreas.map(({ area, count }) => (
-                <View key={area!.id} style={styles.areaChip}>
-                  <Text style={styles.areaChipText}>
-                    {area!.icon} {area!.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
+          {topAreaExcerpts.map(({ area, excerpt }) => (
+            <Text key={area!.id} style={styles.areaExcerpt}>
+              {area!.icon} {area!.label} — "{excerpt}"
+            </Text>
+          ))}
         </View>
       ) : null}
 
@@ -88,7 +95,11 @@ export function HistoryScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
           renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
-          renderItem={({ item }) => <HistoryRow row={item} />}
+          renderItem={({ item }) => (
+            <PageTurn>
+              <HistoryRow row={item} />
+            </PageTurn>
+          )}
         />
       )}
     </ScreenContainer>
@@ -130,34 +141,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   subtitle: {
-    ...typography.bodyMuted,
+    ...typography.quote,
   },
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.xl,
     marginBottom: spacing.xl,
-  },
-  summaryHeadline: {
-    ...typography.title,
-    marginBottom: spacing.sm,
-  },
-  areaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.sm,
-    marginTop: spacing.sm,
   },
-  areaChip: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: radii.pill,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-  },
-  areaChipText: {
-    color: colors.accentDark,
-    fontSize: 13,
-    fontWeight: '500',
+  areaExcerpt: {
+    ...typography.bodyMuted,
   },
   listContent: {
     paddingBottom: spacing.xl,

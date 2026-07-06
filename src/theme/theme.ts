@@ -109,9 +109,11 @@ export const typography = {
   },
 };
 
-// Two tiers only. e1 for anything at rest (cards, rows, chips). e2 for a
-// deliberate lift — modal sheets, the Tour, a completion mark. Never
-// beyond e2: nothing here reaches for drama.
+// Three tiers. e1 for anything at rest (cards, rows, chips). e2 for a
+// deliberate lift — modal sheets, the Tour, a completion mark. e3 (hero)
+// is reserved exclusively for the Session Completion arrival card and
+// full-screen sheets entering — the only surface allowed to feel like
+// it's "above" everything else, and only momentarily.
 export const elevation = {
   soft: {
     shadowColor: '#000000',
@@ -127,6 +129,13 @@ export const elevation = {
     shadowRadius: 24,
     elevation: 3,
   },
+  hero: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.08,
+    shadowRadius: 32,
+    elevation: 5,
+  },
 };
 
 // Transitions are felt, not seen: short fades/settles between steps,
@@ -141,5 +150,15 @@ export const motion = {
   easing: {
     settle: [0.4, 0, 0.2, 1] as const,
     arrive: [0.16, 1, 0.3, 1] as const,
+  },
+  // Page Turn: a subtle horizontal settle (translateX + opacity) for
+  // Journal entries and Archived Journey rows appearing — evokes a page
+  // closing rather than a card appearing. Reuses the slow duration and
+  // arrive easing; distinct only in translating horizontally, and in
+  // being reserved for reflection/memory moments, never session
+  // completion (Arrival Mark keeps that meaning exclusively).
+  pageTurn: {
+    translateX: 12,
+    duration: 250,
   },
 };

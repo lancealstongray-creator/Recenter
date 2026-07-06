@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { MainTabParamList } from './types';
 import { HomeScreen } from '../screens/home/HomeScreen';
-import { HistoryScreen } from '../screens/history/HistoryScreen';
+import { JournalScreen } from '../screens/journal/JournalScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { colors, spacing } from '../theme/theme';
 
@@ -14,7 +14,7 @@ type IoniconName = keyof typeof Ionicons.glyphMap;
 
 const ICONS: Record<keyof MainTabParamList, { outline: IoniconName; filled: IoniconName }> = {
   Home: { outline: 'home-outline', filled: 'home' },
-  History: { outline: 'book-outline', filled: 'book' },
+  Journal: { outline: 'book-outline', filled: 'book' },
   Profile: { outline: 'person-outline', filled: 'person' },
 };
 
@@ -62,7 +62,7 @@ export function MainTabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} options={{ tabBarLabel: 'Journey' }} />
+      <Tab.Screen name="Journal" component={JournalScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

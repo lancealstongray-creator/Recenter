@@ -13,7 +13,7 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'Notifications'>;
 type Choice = 'yes' | 'not_now';
 
 export function NotificationsScreen({ navigation }: Props) {
-  const { profile, updateProfile, completeOnboarding } = useApp();
+  const { profile, completeOnboarding } = useApp();
   const [choice, setChoice] = useState<Choice | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
 

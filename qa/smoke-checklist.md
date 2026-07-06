@@ -37,6 +37,14 @@ fresh install without restarting the dev server.
 - [ ] App resumes exactly at Faith Preference — not Welcome, not a step
       further ahead — with life areas already selected
 
+## Navigation (QA-NAV-01, QA-NAV-02)
+
+- [ ] Bottom tab bar reads exactly Home, Journal, Profile — no History or
+      Journey tab exists anywhere
+- [ ] Archived Journey is reachable via a quiet text link at the bottom of
+      Journal, and via a secondary link in Profile — never from the tab
+      bar
+
 ## Home (QA-HOME-01 → QA-HOME-05, QA-EMPTY-01 → QA-EMPTY-03, QA-EMPTY-05)
 
 - [ ] Home content renders top-to-bottom in exact spec order: greeting →
@@ -65,6 +73,18 @@ fresh install without restarting the dev server.
       shows the reassuring offline banner on Home; toggling back online
       removes it; no feature stops working either way (QA-EMPTY-05, web
       only)
+
+## Recommended Sessions / Session Picker (QA-REC-01 → QA-REC-06)
+
+- [ ] The primary card's eyebrow reads "Suggested for you" only after a
+      consistent multi-day pattern has formed (5+ of the last 7 days for
+      that session type) — on a fresh install or occasional use, it shows
+      the plain default label instead (QA-REC-01)
+- [ ] "Or choose something else" beneath the Begin button opens a bottom
+      sheet listing all 4 session types with no ranking, score, or
+      "recommended" marker on any row (QA-REC-05)
+- [ ] Tapping any row in that sheet routes directly to that session type,
+      regardless of what Home was recommending (QA-REC-06)
 
 ## Daily Recenter (subsequent days) (QA-SES-01 → QA-SES-03)
 
@@ -97,7 +117,7 @@ fresh install without restarting the dev server.
 - [ ] Completing it shows the shared "Nice work." completion screen, then
       updates Home to show tonight's highlight
 
-## Session completion screen (QA-COMPLETE-01 → QA-COMPLETE-05)
+## Session completion screen v2 (QA-COMPLETE-01, QA-COMPLETE-04, QA-COMPLETE-05, QA-COMPLETE2-01 → QA-COMPLETE2-03)
 
 - [ ] Every session type ends on the identical "Nice work." screen with
       the exact copy "You've taken a moment to reconnect with what
@@ -105,27 +125,64 @@ fresh install without restarting the dev server.
 - [ ] If today has a One Focus, a togglable focus-complete row is shown;
       toggling it and reopening the screen later (or checking Home)
       reflects the new state (QA-COMPLETE-04)
-- [ ] "Return Home" always lands on the Home tab, even if a different tab
-      was active before starting the session (QA-COMPLETE-02)
-- [ ] "Done" returns to wherever the user was before the session started,
-      not necessarily Home (QA-COMPLETE-03)
-- [ ] Immediately after either button, Home's recommendation and any
+- [ ] Two equal-weight options appear: "Return to Today" (filled) and
+      "Sit a Moment" (outline) — no countdown, no auto-dismiss
+      (QA-COMPLETE2-01)
+- [ ] Tapping "Sit a Moment" hides both buttons and holds the same view
+      (no new screen, no timer); a quiet "Return to Today" text link
+      fades in after a few seconds (QA-COMPLETE2-02)
+- [ ] The arrival card visually sits above everything else on screen
+      (elevation.hero) — the only place in the app that lifted this much
+      (QA-COMPLETE2-03)
+- [ ] Immediately after returning, Home's recommendation and any
       focus/highlight blocks reflect the just-completed session with no
       stale state (QA-COMPLETE-05)
 
-## Journey / History (QA-ABS-01, QA-ABS-03, QA-ABS-04)
+## Journal (QA-JOURNAL-01 → QA-JOURNAL-06)
 
-- [ ] Title reads "Your Journey." (not "History")
-- [ ] Summary card shows "You've recentered N days" — a plain count, no
-      streak language
-- [ ] Life-area chips in the summary show icon + label only, no numbers
+- [ ] Journal's composer is docked at the top and visible immediately on
+      opening the tab — not hidden behind a "+" button (QA-JOURNAL-01)
+- [ ] Saving an entry clears the composer, and the new entry settles into
+      the feed just below with a subtle horizontal Page Turn reveal, most
+      recent first (QA-JOURNAL-02)
+- [ ] The feed mixes freeform entries with existing session reflections
+      (today's One Focus, Evening Reflection notes, Midday/Wind Down
+      notes) in one identically-styled feed, sorted by time — not split
+      into separate tabs or sections (QA-JOURNAL-03)
+- [ ] With Faith-Based Encouragement OFF in Profile, no "This is a
+      prayer" toggle appears in the composer at all (QA-JOURNAL-04)
+- [ ] With Faith-Based Encouragement ON, the toggle appears, and marking
+      an entry as a prayer shows a "Prayer" eyebrow on that entry in the
+      feed (QA-JOURNAL-04)
+- [ ] "Private by design." appears only when the feed is completely empty
+      (genuinely first-ever use); saving any entry makes it disappear for
+      good (QA-JOURNAL-05)
+- [ ] Saving two entries the same day keeps both, in save order — no
+      overwrite (QA-JOURNAL-06)
+
+## Archived Journey (QA-ABS-01, QA-ABS-03, QA-ABS-04, QA-ARCHIVE-01 → QA-ARCHIVE-03)
+
+- [ ] Title reads "Archived Journey" (not "History" or "Your Journey")
+- [ ] Opening line reads "You've been reflecting for N months." (or "a
+      few weeks" for a very new install) — stated once, never repeated
+      as a counter while scrolling (QA-ARCHIVE-02)
+- [ ] Rows are grouped by season ("Early Summer," "Winter," etc.), never
+      by calendar month, never showing a bare year in the section header
+      (QA-ARCHIVE-01)
+- [ ] The summary area shows one representative excerpt per life area
+      (e.g. `Health — "Be present with my family"`), never a numeric
+      count (QA-ARCHIVE-03, QA-ABS-04)
 - [ ] A day with no entries simply doesn't appear — no gap marker, no red
-      state
+      state (QA-ABS-01)
 
 ## Profile
 
 - [ ] Name, Life Areas, Faith-Based Encouragement are all editable
       in place and persist after navigating away and back
+- [ ] "About Recenter" ends with the trust line: "Your reflections stay
+      on this device. We designed Recenter this way on purpose."
+- [ ] A quiet "Archived Journey" text link is reachable from Profile
+      (QA-NAV-02)
 - [ ] "Take the app tour" opens the Tour from Profile at any time,
       regardless of whether it's been seen before
 - [ ] "Reset my data" is visually separated from "Take the app tour"
@@ -138,7 +195,7 @@ fresh install without restarting the dev server.
 - [ ] Tapping "Not now" makes the prompt disappear permanently (reload to
       confirm it doesn't come back)
 - [ ] Tapping "Take the tour" shows exactly 4 stops (Home, Today's Focus,
-      Journey, Profile), each with a Skip (X) available, "Next" through
+      Journal, Profile), each with a Skip (X) available, "Next" through
       to "Done" on the last stop
 - [ ] After completing or skipping the tour, it does not reappear
       automatically on Home; it's only reachable again from Profile

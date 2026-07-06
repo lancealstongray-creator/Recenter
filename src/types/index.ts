@@ -47,6 +47,18 @@ export interface WindDownEntry {
   completedAt: string; // ISO timestamp
 }
 
+// A freeform Journal entry — reflection or free writing, distinct from
+// the structured session data above. Multiple entries can exist per day,
+// so these are stored as a flat list, not keyed by date.
+export interface JournalEntry {
+  id: string;
+  text: string;
+  // Shown only when the user's onboarding faith preference enables it —
+  // content adapts, the interface never changes shape.
+  isPrayer?: boolean;
+  createdAt: string; // ISO timestamp
+}
+
 export type FaithPreference = 'yes' | 'no' | null;
 
 export interface UserProfile {
