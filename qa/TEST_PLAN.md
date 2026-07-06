@@ -13,25 +13,18 @@ Severity: **Critical** (breaks a QA rule below, ships broken), **High**
 
 1. No duplicate session completions.
 2. No reflection/session data loss.
-3. Recommended Sessions must behave predictably. *(not yet implemented — see note below)*
-4. Adaptive Rhythms must never create confusion, shame, or broken daily state. *(not yet implemented — see note below)*
+3. Recommended Sessions must behave predictably.
+4. Adaptive Rhythms must never create confusion, shame, or broken daily state.
 5. Missed days must not punish or shame the user.
 6. Returning users must resume without friction.
 7. Time-based recommendations must survive midnight, time zones, and missed days.
 
-> **Note on rules 3 and 4:** as of this writing, neither a "Recommended
-> Sessions" ranking/prioritization system nor an "Adaptive Rhythms"
-> fallback/default system exists anywhere in the codebase (confirmed via
-> `grep -ri "recommend\|adaptive"` across `src/` — zero matches). The only
-> time-based logic today is `greetingForNow()` (morning/afternoon/evening
-> greeting text) and the single Daily Recenter → Evening Reflection
-> sequence gated by whether today's entries exist. Scenarios below that
-> reference Recommended Sessions / Adaptive Rhythms are written against
-> **today's actual behavior** and marked `N/A — not implemented`
-> where the plan's language doesn't map to anything real yet. Do not treat
-> these as bugs; treat them as the honest current baseline. When either
-> system is actually built, promote these from placeholders to real
-> scenarios.
+> **Update:** Recommended Sessions and Adaptive Rhythms are now
+> implemented (`src/utils/adaptiveRhythms.ts`), as a deterministic,
+> non-AI time-window + completion-state engine covering all 4 session
+> types (Morning, Midday, Evening, Wind Down). QA-TOD-05/06 below have
+> been promoted from placeholders to real scenarios; see section 3 and
+> the new section 8 for full coverage.
 
 ---
 
@@ -61,17 +54,14 @@ Severity: **Critical** (breaks a QA rule below, ships broken), **High**
 
 ## 3. Morning / afternoon / evening session recommendation
 
-*(Recenter's actual implementation: a single greeting-text function, not a
-recommendation engine — see note above.)*
-
 | ID | Scenario | Severity | Automated? |
 |----|----------|----------|------------|
 | QA-TOD-01 | Greeting reads "Good morning" for hour < 12 | Medium | **Automated** — `src/utils/date.test.ts` |
 | QA-TOD-02 | Greeting reads "Good afternoon" for 12 ≤ hour < 17 | Medium | **Automated** — `src/utils/date.test.ts` |
 | QA-TOD-03 | Greeting reads "Good evening" for hour ≥ 17 | Medium | **Automated** — `src/utils/date.test.ts` |
-| QA-TOD-04 | Home shows the Daily Recenter card regardless of time of day if today's entry doesn't exist yet — a user can do their "Morning" session in the evening without friction or judgment | High | Manual |
-| QA-TOD-05 | *Recommended Sessions priority ranking* | — | **N/A — not implemented.** No ranking/prioritization system exists. |
-| QA-TOD-06 | *Adaptive Rhythms fallback/default behavior* | — | **N/A — not implemented.** No adaptive system exists; the only "default" is the fixed 5-step Daily Recenter engine, which has no fallback branches to test. |
+| QA-TOD-04 | Home shows the recommended session card regardless of time of day if today's entry for that type doesn't exist yet — a user can do their "Morning" session in the evening without friction or judgment | High | Manual |
+| QA-TOD-05 | Recommended Sessions priority ranking: exactly one session type is recommended at a time, chosen by scanning forward from the current time window through the day's remaining session types | Critical | **Automated** — `src/utils/adaptiveRhythms.test.ts` |
+| QA-TOD-06 | Adaptive Rhythms fallback/default behavior: when all 4 session types are complete for today, no session is recommended and Home shows the resting empty state instead | High | **Automated** — `src/utils/adaptiveRhythms.test.ts`; UI Manual |
 
 ## 4. Missed day / absence / return behavior
 
@@ -111,14 +101,36 @@ recommendation engine — see note above.)*
 |----|----------|----------|------------|
 | QA-GUARD-01 | Every Phase 2/3 feature flag remains `false` — nothing deferred ships silently | Critical | **Automated** — `src/flags/featureFlags.test.ts` |
 | QA-GUARD-02 | No streak, badge, or "missed day" copy anywhere in the shipped screens | High | Manual (grep-assisted: `grep -ri "streak\|badge\|missed"` across `src/screens` should return nothing product-facing) |
+| QA-GUARD-03 | Home never shows more than one recommended session at a time | Critical | **Automated** — `src/utils/adaptiveRhythms.test.ts` (`recommendSession` return type is a single `SessionType \| null`) |
+| QA-GUARD-04 | Adaptive Rhythms never recommends a session type whose time window has already passed today (no "missed session" resurfacing, no catch-up pressure) | Critical | **Automated** — `src/utils/adaptiveRhythms.test.ts` |
+
+## 8. Today Experience: Home structure, session completion, empty states
+
+| ID | Scenario | Severity | Automated? |
+|----|----------|----------|------------|
+| QA-HOME-01 | Home renders in spec order: greeting → calming message → recommended session card → begin button → One Focus (if present) → daily encouragement → bottom nav | High | Manual |
+| QA-HOME-02 | Calming message text matches the current time window and is distinct from the rotating daily encouragement line | Medium | Manual |
+| QA-HOME-03 | First-time-ever user sees "Let's begin your first moment together." on the recommended session card instead of the type's normal blurb | Medium | Manual |
+| QA-HOME-04 | A user who has used other session types but never this one sees a "first [type] for you" variant, not the normal recurring blurb | Medium | Manual |
+| QA-HOME-05 | Begin button on the recommended card routes to the correct screen for each of the 4 session types (Morning → DailyRecenter, Midday → MiddayReset, Evening → EveningReflection, Wind Down → WindDown) | Critical | Manual |
+| QA-COMPLETE-01 | Every session type (Morning, Midday, Evening, Wind Down) ends on the shared "Nice work." completion screen with the exact spec copy | High | Manual |
+| QA-COMPLETE-02 | Completion screen's "Return Home" always lands on the Home tab regardless of which tab was active before the session started | High | Manual |
+| QA-COMPLETE-03 | Completion screen's "Done" returns to the previous screen/tab (not forced to Home) | Medium | Manual |
+| QA-COMPLETE-04 | When a One Focus exists for today, the completion screen shows a togglable focus-complete control; toggling persists to `dailyEntries[date].focusCompleted` | High | **Automated** (persistence) — `src/context/AppContext.test.tsx`; UI toggle Manual |
+| QA-COMPLETE-05 | Completing a session immediately refreshes Home's recommendation (no stale/duplicate card, no manual refresh needed) | Critical | Manual |
+| QA-EMPTY-01 | First-time use: Home's recommended card reads "Let's begin your first moment together." | Medium | Manual (see QA-HOME-03) |
+| QA-EMPTY-02 | No One Focus selected: quiet block reads "No focus set for today" / "That's completely fine — not every day needs one." — never an error or missing-state look | High | Manual |
+| QA-EMPTY-03 | Session already completed today: that session type is skipped by the recommendation scan; if it was the only remaining type, Home shows "You've shown up for yourself today. That's enough." | Critical | **Automated** (logic) — `src/utils/adaptiveRhythms.test.ts`; UI Manual |
+| QA-EMPTY-04 | No history: Journey shows a hopeful empty state, never a blank/broken screen | Medium | Manual |
+| QA-EMPTY-05 | Offline mode: reassuring banner ("You're offline — Recenter still works. Everything is saved on this device.") shown on Home, all features remain fully usable | Medium | Manual (web only — `useIsOffline` has no native signal without an extra native module) |
 
 ---
 
 ## Coverage summary
 
-- **Automated today:** 32 Jest tests across 6 suites — the data/logic layer
+- **Automated today:** 43 Jest tests across 7 suites — the data/logic layer
   where the QA rules actually live (dedup, no data loss, resume, time
-  math, flag hygiene).
+  math, flag hygiene, deterministic session recommendation).
 - **Manual today:** full-flow UI journeys (onboarding screens, session
   screens, Journey, Profile, Tour) — see `smoke-checklist.md` and
   `regression-checklist.md`. These are documented, not automated, because

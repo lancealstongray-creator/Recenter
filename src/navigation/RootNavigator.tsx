@@ -8,6 +8,8 @@ import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 import { DailyRecenterScreen } from '../screens/dailyRecenter/DailyRecenterScreen';
 import { EveningReflectionScreen } from '../screens/eveningReflection/EveningReflectionScreen';
+import { MiddayResetScreen } from '../screens/middayReset/MiddayResetScreen';
+import { WindDownScreen } from '../screens/windDown/WindDownScreen';
 import { TourScreen } from '../screens/tour/TourScreen';
 import { useApp } from '../context/AppContext';
 import { colors, motion } from '../theme/theme';
@@ -70,6 +72,16 @@ export function RootNavigator() {
         <Stack.Screen
           name="EveningReflection"
           component={EveningReflectionScreen}
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="MiddayReset"
+          component={MiddayResetScreen}
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="WindDown"
+          component={WindDownScreen}
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
         <Stack.Screen

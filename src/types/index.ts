@@ -14,7 +14,10 @@ export interface DailyRecenterEntry {
   date: string; // YYYY-MM-DD
   moodId: string;
   lifeAreaId: string;
-  focus: string;
+  focus: string; // may be blank — One Focus is optional, not required
+  // Whether the user has marked today's One Focus as complete. Purely
+  // informational — leaving it active carries no penalty or indicator.
+  focusCompleted?: boolean;
   completedAt: string; // ISO timestamp
 }
 
@@ -24,6 +27,23 @@ export interface EveningReflectionEntry {
   challenge: string;
   gratitude: string;
   note?: string;
+  completedAt: string; // ISO timestamp
+}
+
+// The four session types the Today Experience recommends between.
+// "morning" reuses the existing Daily Recenter entry; the other three
+// are new, intentionally lightweight entries.
+export type SessionType = 'morning' | 'midday' | 'evening' | 'windDown';
+
+export interface MiddayResetEntry {
+  date: string; // YYYY-MM-DD
+  note?: string; // optional — a single quick thought, may be skipped
+  completedAt: string; // ISO timestamp
+}
+
+export interface WindDownEntry {
+  date: string; // YYYY-MM-DD
+  note?: string; // optional — a single closing thought, may be skipped
   completedAt: string; // ISO timestamp
 }
 

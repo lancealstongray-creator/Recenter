@@ -1,10 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DailyRecenterEntry, EveningReflectionEntry, UserProfile } from '../types';
+import {
+  DailyRecenterEntry,
+  EveningReflectionEntry,
+  MiddayResetEntry,
+  UserProfile,
+  WindDownEntry,
+} from '../types';
 
 const KEYS = {
   profile: '@recenter/profile',
   dailyEntries: '@recenter/dailyEntries',
   eveningEntries: '@recenter/eveningEntries',
+  middayEntries: '@recenter/middayEntries',
+  windDownEntries: '@recenter/windDownEntries',
 };
 
 export const DEFAULT_PROFILE: UserProfile = {
@@ -89,9 +97,61 @@ export async function saveEveningEntry(
   }
 }
 
+export async function loadMiddayEntries(): Promise<StorageResult<Record<string, MiddayResetEntry>>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.middayEntries);
+    return { ok: true, data: raw ? JSON.parse(raw) : {} };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
+export async function saveMiddayEntry(
+  entry: MiddayResetEntry
+): Promise<StorageResult<Record<string, MiddayResetEntry>>> {
+  try {
+    const existing = await loadMiddayEntries();
+    const all = existing.ok ? existing.data : {};
+    const next = { ...all, [entry.date]: entry };
+    await AsyncStorage.setItem(KEYS.middayEntries, JSON.stringify(next));
+    return { ok: true, data: next };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
+export async function loadWindDownEntries(): Promise<StorageResult<Record<string, WindDownEntry>>> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.windDownEntries);
+    return { ok: true, data: raw ? JSON.parse(raw) : {} };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
+export async function saveWindDownEntry(
+  entry: WindDownEntry
+): Promise<StorageResult<Record<string, WindDownEntry>>> {
+  try {
+    const existing = await loadWindDownEntries();
+    const all = existing.ok ? existing.data : {};
+    const next = { ...all, [entry.date]: entry };
+    await AsyncStorage.setItem(KEYS.windDownEntries, JSON.stringify(next));
+    return { ok: true, data: next };
+  } catch (err) {
+    return failure(err);
+  }
+}
+
 export async function clearAllData(): Promise<StorageResult<null>> {
   try {
-    await AsyncStorage.removeMany([KEYS.profile, KEYS.dailyEntries, KEYS.eveningEntries]);
+    await AsyncStorage.removeMany([
+      KEYS.profile,
+      KEYS.dailyEntries,
+      KEYS.eveningEntries,
+      KEYS.middayEntries,
+      KEYS.windDownEntries,
+    ]);
     return { ok: true, data: null };
   } catch (err) {
     return failure(err);

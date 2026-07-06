@@ -37,24 +37,81 @@ fresh install without restarting the dev server.
 - [ ] App resumes exactly at Faith Preference — not Welcome, not a step
       further ahead — with life areas already selected
 
+## Home (QA-HOME-01 → QA-HOME-05, QA-EMPTY-01 → QA-EMPTY-03, QA-EMPTY-05)
+
+- [ ] Home content renders top-to-bottom in exact spec order: greeting →
+      short calming message → recommended session card → begin button →
+      today's One Focus (only if present) → daily encouragement → bottom
+      nav (QA-HOME-01)
+- [ ] The calming message under the greeting is a short line distinct from
+      the rotating encouragement line at the bottom (QA-HOME-02)
+- [ ] Exactly one recommended session card ever shows at a time — never
+      zero-with-a-button and never more than one (QA-HOME-05, QA-GUARD-03)
+- [ ] On a brand-new install, the recommended card reads "Let's begin your
+      first moment together." (QA-HOME-03, QA-EMPTY-01)
+- [ ] After completing at least one session type but never a given other
+      type, that other type's first recommendation reads "A first
+      [type] for you." instead of its normal recurring blurb (QA-HOME-04)
+- [ ] The Begin button on the card routes to the correct flow for each of
+      the 4 types: Morning → Daily Recenter, Midday → Midday Reset,
+      Evening → Evening Reflection, Wind Down → Wind Down (QA-HOME-05)
+- [ ] With no One Focus set for today, the quiet block reads "No focus set
+      for today" / "That's completely fine — not every day needs one." —
+      never blank, never an error look (QA-EMPTY-02)
+- [ ] After all 4 session types are completed for today, no recommended
+      card appears; instead "You've shown up for yourself today. That's
+      enough." is shown (QA-TOD-06, QA-EMPTY-03)
+- [ ] Simulating the browser going offline (devtools → Network → Offline)
+      shows the reassuring offline banner on Home; toggling back online
+      removes it; no feature stops working either way (QA-EMPTY-05, web
+      only)
+
 ## Daily Recenter (subsequent days) (QA-SES-01 → QA-SES-03)
 
-- [ ] From Home, tap "Begin Today" — Greeting → Mood → Life Area Reminder
-      → One Focus → Encouragement, 5 steps, progress dots on every step
-      except Encouragement (no dots there)
+- [ ] From Home, tap the recommended card's begin button for Morning
+      Session — Greeting → Mood → Life Area Reminder → One Focus →
+      Encouragement, 5 steps, progress dots on every step except
+      Encouragement (no dots there)
 - [ ] Close (X) at any step returns to Home without saving a partial entry
-- [ ] Completing the session updates Home to show today's focus in the
-      quiet card, not the "Begin Today" card
+- [ ] One Focus step can be left blank and still continue (it is fully
+      optional, not just optional-looking)
+- [ ] Completing the session shows the shared "Nice work." completion
+      screen, then updates Home's One Focus block and recommendation
 - [ ] No "You're ready." screen appears this time — only on the very
       first session ever
 
+## Midday Reset / Wind Down
+
+- [ ] Both are reachable only via Home's recommended card (no separate tab
+      or menu entry) and follow the same 2-step opener + optional-note
+      pattern as Daily Recenter/Evening Reflection
+- [ ] Wind Down uses the evening background tint; both end on the shared
+      "Nice work." completion screen
+
 ## Evening Reflection
 
-- [ ] From Home (after Daily Recenter is done), tap "Take a Moment" —
-      3 fixed prompts + 1 optional note screen
+- [ ] From Home (once Evening Reflection is the recommendation), tap
+      "Take a Moment" — 3 fixed prompts + 1 optional note screen
 - [ ] Each prompt's Continue is disabled until text is entered; the final
       optional note's Close is always enabled
-- [ ] Completing it updates Home to show tonight's highlight
+- [ ] Completing it shows the shared "Nice work." completion screen, then
+      updates Home to show tonight's highlight
+
+## Session completion screen (QA-COMPLETE-01 → QA-COMPLETE-05)
+
+- [ ] Every session type ends on the identical "Nice work." screen with
+      the exact copy "You've taken a moment to reconnect with what
+      matters today." (QA-COMPLETE-01)
+- [ ] If today has a One Focus, a togglable focus-complete row is shown;
+      toggling it and reopening the screen later (or checking Home)
+      reflects the new state (QA-COMPLETE-04)
+- [ ] "Return Home" always lands on the Home tab, even if a different tab
+      was active before starting the session (QA-COMPLETE-02)
+- [ ] "Done" returns to wherever the user was before the session started,
+      not necessarily Home (QA-COMPLETE-03)
+- [ ] Immediately after either button, Home's recommendation and any
+      focus/highlight blocks reflect the just-completed session with no
+      stale state (QA-COMPLETE-05)
 
 ## Journey / History (QA-ABS-01, QA-ABS-03, QA-ABS-04)
 

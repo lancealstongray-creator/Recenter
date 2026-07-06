@@ -1,27 +1,36 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { FlowLayout } from '../../components/FlowLayout';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SelectChip } from '../../components/SelectChip';
+import { ArrivalMark } from '../../components/ArrivalMark';
+import { SessionCompleteScreen } from '../../components/SessionCompleteScreen';
 import { useApp } from '../../context/AppContext';
-import { useReducedMotion } from '../../utils/motion';
 import { MOODS } from '../../constants/moods';
 import { LIFE_AREAS, getLifeArea } from '../../constants/lifeAreas';
 import { ENCOURAGEMENTS } from '../../constants/encouragements';
 import { todayKey, greetingForNow } from '../../utils/date';
 import { pickForDate } from '../../utils/pick';
-import { colors, radii, spacing, typography, motion } from '../../theme/theme';
+import { colors, radii, spacing, typography } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DailyRecenter'>;
 
 const TOTAL_STEPS = 5;
 
 export function DailyRecenterScreen({ navigation }: Props) {
-  const { profile, saveDailyEntry, pendingFirstFocus, clearPendingFirstFocus, justOnboarded, clearJustOnboarded } =
-    useApp();
+  const {
+    profile,
+    dailyEntries,
+    saveDailyEntry,
+    setFocusCompleted,
+    pendingFirstFocus,
+    clearPendingFirstFocus,
+    justOnboarded,
+    clearJustOnboarded,
+  } = useApp();
   const [step, setStep] = useState(0);
   const [moodId, setMoodId] = useState<string | null>(null);
   // Seeds from the focus chosen during onboarding's One Focus Setup, if
@@ -48,9 +57,14 @@ export function DailyRecenterScreen({ navigation }: Props) {
   const reminderArea = getLifeArea(reminderAreaId) ?? LIFE_AREAS[0];
   const encouragement = useMemo(() => pickForDate(ENCOURAGEMENTS, date), [date]);
   const greeting = greetingForNow();
+  const todaysEntry = dailyEntries[date];
 
   function close() {
     navigation.goBack();
+  }
+
+  function returnHome() {
+    navigation.navigate('Main', { screen: 'Home' });
   }
 
   async function handleFinish() {
@@ -69,7 +83,7 @@ export function DailyRecenterScreen({ navigation }: Props) {
       <FlowLayout
         step={0}
         totalSteps={TOTAL_STEPS}
-        eyebrow="Daily Recenter"
+        eyebrow="Morning Session"
         title={`${greeting}${profile.name ? `, ${profile.name}` : ''}.`}
         subtitle="Take a quiet moment before your day picks up speed."
         primaryLabel="Begin"
@@ -138,11 +152,10 @@ export function DailyRecenterScreen({ navigation }: Props) {
         step={3}
         totalSteps={TOTAL_STEPS}
         eyebrow="One focus"
-        title="What's the one thing you'll focus on today?"
-        subtitle="Just one. Small is fine."
+        title="Is there one thing you'll focus on today?"
+        subtitle="Completely optional — leave it blank if not."
         primaryLabel="Continue"
         onPrimaryPress={handleFinish}
-        primaryDisabled={focus.trim().length === 0}
         showBack
         onBack={() => setStep(2)}
         onClose={close}
@@ -168,61 +181,44 @@ export function DailyRecenterScreen({ navigation }: Props) {
         eyebrow="Encouragement"
         title={encouragement}
         primaryLabel="Close"
-        onPrimaryPress={isFirstSession ? () => setStep(5) : close}
+        onPrimaryPress={() => setStep(isFirstSession ? 5 : 6)}
         onClose={close}
         hideDots
       />
     );
   }
 
-  return (
-    <ScreenContainer>
-      <View style={styles.readyCenter}>
-        <ArrivalMark>
-          <Text style={styles.readyMarkGlyph}>✓</Text>
-        </ArrivalMark>
-        <Text style={styles.readyTitle} accessibilityRole="header">
-          You're ready.
-        </Text>
-        <Text style={styles.readySubtitle}>
-          That's the whole practice — a quiet moment, morning and evening. Nothing else to set up.
-        </Text>
-      </View>
-      <View style={styles.readyFooter}>
-        <PrimaryButton label="Continue to Home" onPress={close} />
-      </View>
-    </ScreenContainer>
-  );
-}
-
-// The signature "you're done" moment: scale 0.85→1 + fade, arrive easing,
-// slow duration. No bounce, no overshoot.
-function ArrivalMark({ children }: { children: React.ReactNode }) {
-  const scale = useRef(new Animated.Value(0.85)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const reducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    const duration = reducedMotion ? motion.duration.base / 2 : motion.duration.slow;
-    scale.setValue(reducedMotion ? 1 : 0.85);
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration,
-        easing: Easing.bezier(...motion.easing.arrive),
-        useNativeDriver: true,
-      }),
-    ]).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  if (step === 5) {
+    // First session only — a dedicated, calmer arrival than the standard
+    // completion screen, since this is a genuinely different moment.
+    return (
+      <ScreenContainer>
+        <View style={styles.readyCenter}>
+          <ArrivalMark>
+            <Text style={styles.readyMarkGlyph}>✓</Text>
+          </ArrivalMark>
+          <Text style={styles.readyTitle} accessibilityRole="header">
+            You're ready.
+          </Text>
+          <Text style={styles.readySubtitle}>
+            That's the whole practice — a quiet moment, morning and evening. Nothing else to set up.
+          </Text>
+        </View>
+        <View style={styles.readyFooter}>
+          <PrimaryButton label="Continue to Home" onPress={close} />
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
-    <Animated.View style={[styles.readyMark, { opacity, transform: [{ scale }] }]}>{children}</Animated.View>
+    <SessionCompleteScreen
+      onReturnHome={returnHome}
+      onDone={close}
+      focus={todaysEntry?.focus || undefined}
+      focusCompleted={todaysEntry?.focusCompleted}
+      onToggleFocusCompleted={() => setFocusCompleted(date, !todaysEntry?.focusCompleted)}
+    />
   );
 }
 
@@ -236,15 +232,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  readyMark: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
   },
   readyMarkGlyph: {
     fontSize: 28,

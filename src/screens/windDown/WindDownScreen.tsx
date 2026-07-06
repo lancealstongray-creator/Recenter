@@ -5,23 +5,17 @@ import { RootStackParamList } from '../../navigation/types';
 import { FlowLayout } from '../../components/FlowLayout';
 import { SessionCompleteScreen } from '../../components/SessionCompleteScreen';
 import { useApp } from '../../context/AppContext';
-import { EVENING_PROMPTS } from '../../constants/prompts';
 import { todayKey } from '../../utils/date';
 import { colors, radii, spacing, typography } from '../../theme/theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EveningReflection'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'WindDown'>;
 
-// 3 prompt steps + 1 optional-note step
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 2;
 
-export function EveningReflectionScreen({ navigation }: Props) {
-  const { dailyEntries, saveEveningEntry, setFocusCompleted } = useApp();
+export function WindDownScreen({ navigation }: Props) {
+  const { dailyEntries, saveWindDownEntry, setFocusCompleted } = useApp();
   const [step, setStep] = useState(0);
-  const [highlight, setHighlight] = useState('');
-  const [challenge, setChallenge] = useState('');
-  const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
-
   const date = todayKey();
   const todaysEntry = dailyEntries[date];
 
@@ -33,34 +27,43 @@ export function EveningReflectionScreen({ navigation }: Props) {
     navigation.navigate('Main', { screen: 'Home' });
   }
 
-  async function handleSave() {
-    await saveEveningEntry({
+  async function handleFinish() {
+    await saveWindDownEntry({
       date,
-      highlight: highlight.trim(),
-      challenge: challenge.trim(),
-      gratitude: gratitude.trim(),
       note: note.trim() || undefined,
       completedAt: new Date().toISOString(),
     });
-    setStep(4);
+    setStep(2);
   }
 
-  const answers = [highlight, challenge, gratitude];
-  const setters = [setHighlight, setChallenge, setGratitude];
-
-  if (step < 3) {
-    const prompt = EVENING_PROMPTS[step];
+  if (step === 0) {
     return (
       <FlowLayout
-        step={step}
+        step={0}
         totalSteps={TOTAL_STEPS}
-        eyebrow="Evening Reflection"
-        title={prompt.question}
+        eyebrow="Wind Down"
+        title="Time to wind down."
+        subtitle="A short pause before rest."
+        primaryLabel="Begin"
+        onPrimaryPress={() => setStep(1)}
+        onClose={close}
+        backgroundColor={colors.backgroundEvening}
+      />
+    );
+  }
+
+  if (step === 1) {
+    return (
+      <FlowLayout
+        step={1}
+        totalSteps={TOTAL_STEPS}
+        eyebrow="Wind Down"
+        title="What are you releasing before rest?"
+        subtitle="Completely optional — leave it blank if not."
         primaryLabel="Continue"
-        onPrimaryPress={() => setStep(step + 1)}
-        primaryDisabled={answers[step].trim().length === 0}
-        showBack={step > 0}
-        onBack={() => setStep(step - 1)}
+        onPrimaryPress={handleFinish}
+        showBack
+        onBack={() => setStep(0)}
         onClose={close}
         backgroundColor={colors.backgroundEvening}
       >
@@ -68,39 +71,10 @@ export function EveningReflectionScreen({ navigation }: Props) {
           style={styles.input}
           placeholder="Take a moment..."
           placeholderTextColor={colors.textTertiary}
-          value={answers[step]}
-          onChangeText={setters[step]}
-          multiline
-          maxLength={200}
-          autoFocus
-        />
-      </FlowLayout>
-    );
-  }
-
-  if (step === 3) {
-    return (
-      <FlowLayout
-        step={3}
-        totalSteps={TOTAL_STEPS}
-        eyebrow="Optional"
-        title="Anything else on your mind?"
-        subtitle="Completely optional — leave it blank if not."
-        primaryLabel="Close"
-        onPrimaryPress={handleSave}
-        showBack
-        onBack={() => setStep(2)}
-        onClose={close}
-        backgroundColor={colors.backgroundEvening}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="A note to yourself..."
-          placeholderTextColor={colors.textTertiary}
           value={note}
           onChangeText={setNote}
           multiline
-          maxLength={400}
+          maxLength={200}
         />
       </FlowLayout>
     );
@@ -125,7 +99,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.md,
     padding: spacing.lg,
-    minHeight: 120,
+    minHeight: 96,
     textAlignVertical: 'top',
   },
 });

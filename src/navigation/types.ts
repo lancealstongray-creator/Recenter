@@ -1,8 +1,14 @@
 export type RootStackParamList = {
   Onboarding: undefined;
-  Main: undefined;
+  // Optional nested screen param so "Return Home" from a session's
+  // completion screen can both dismiss the modal and land specifically
+  // on the Home tab, even if the user started the session from History
+  // or Profile.
+  Main: { screen: keyof MainTabParamList } | undefined;
   DailyRecenter: undefined;
   EveningReflection: undefined;
+  MiddayReset: undefined;
+  WindDown: undefined;
   Tour: undefined;
 };
 
