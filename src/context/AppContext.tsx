@@ -4,30 +4,42 @@ import {
   clearAllData,
   loadDailyEntries,
   loadEveningEntries,
+  loadMiddayEntries,
   loadProfile,
+  loadWindDownEntries,
   saveDailyEntry as persistDailyEntry,
   saveEveningEntry as persistEveningEntry,
+  saveMiddayEntry as persistMiddayEntry,
   saveProfile as persistProfile,
+  saveWindDownEntry as persistWindDownEntry,
 } from '../storage/storage';
-import { DailyRecenterEntry, EveningReflectionEntry, UserProfile } from '../types';
+import {
+  DailyRecenterEntry,
+  EveningReflectionEntry,
+  MiddayResetEntry,
+  UserProfile,
+  WindDownEntry,
+} from '../types';
 
 interface AppContextValue {
   isLoading: boolean;
   profile: UserProfile;
   dailyEntries: Record<string, DailyRecenterEntry>;
   eveningEntries: Record<string, EveningReflectionEntry>;
+  middayEntries: Record<string, MiddayResetEntry>;
+  windDownEntries: Record<string, WindDownEntry>;
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   completeOnboarding: (profile: Partial<UserProfile>) => Promise<void>;
   saveDailyEntry: (entry: DailyRecenterEntry) => Promise<void>;
   saveEveningEntry: (entry: EveningReflectionEntry) => Promise<void>;
+  saveMiddayEntry: (entry: MiddayResetEntry) => Promise<void>;
+  saveWindDownEntry: (entry: WindDownEntry) => Promise<void>;
+  // Marks (or unmarks) today's One Focus complete — purely informational,
+  // leaving it active carries no penalty or indicator either way.
+  setFocusCompleted: (date: string, completed: boolean) => Promise<void>;
   resetAllData: () => Promise<void>;
-  // Set whenever a save to local storage fails, so a screen can choose
-  // to surface it inline (error/errorSoft tokens) instead of failing
-  // silently. Cleared automatically on the next successful save.
   errorMessage: string | null;
   clearErrorMessage: () => void;
-  // Transient (not persisted) hand-off from onboarding into the user's
-  // real first Morning Session — never a simulated tutorial.
   justOnboarded: boolean;
   pendingFirstFocus: string;
   clearJustOnboarded: () => void;
@@ -41,6 +53,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [dailyEntries, setDailyEntries] = useState<Record<string, DailyRecenterEntry>>({});
   const [eveningEntries, setEveningEntries] = useState<Record<string, EveningReflectionEntry>>({});
+  const [middayEntries, setMiddayEntries] = useState<Record<string, MiddayResetEntry>>({});
+  const [windDownEntries, setWindDownEntries] = useState<Record<string, WindDownEntry>>({});
   const [justOnboarded, setJustOnboarded] = useState(false);
   const [pendingFirstFocus, setPendingFirstFocus] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,11 +63,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const [p, d, e] = await Promise.all([loadProfile(), loadDailyEntries(), loadEveningEntries()]);
+      const [p, d, e, m, w] = await Promise.all([
+        loadProfile(),
+        loadDailyEntries(),
+        loadEveningEntries(),
+        loadMiddayEntries(),
+        loadWindDownEntries(),
+      ]);
       setProfile(p.ok ? p.data : DEFAULT_PROFILE);
       setDailyEntries(d.ok ? d.data : {});
       setEveningEntries(e.ok ? e.data : {});
-      if (!p.ok || !d.ok || !e.ok) {
+      setMiddayEntries(m.ok ? m.data : {});
+      setWindDownEntries(w.ok ? w.data : {});
+      if (!p.ok || !d.ok || !e.ok || !m.ok || !w.ok) {
         setErrorMessage('We had trouble loading your data. Starting fresh for now.');
       }
       setIsLoading(false);
@@ -110,12 +132,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const saveMiddayEntry = useCallback(async (entry: MiddayResetEntry) => {
+    const result = await persistMiddayEntry(entry);
+    if (result.ok) {
+      setMiddayEntries(result.data);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
+  }, []);
+
+  const saveWindDownEntry = useCallback(async (entry: WindDownEntry) => {
+    const result = await persistWindDownEntry(entry);
+    if (result.ok) {
+      setWindDownEntries(result.data);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
+  }, []);
+
+  const setFocusCompleted = useCallback(
+    async (date: string, completed: boolean) => {
+      const existing = dailyEntries[date];
+      if (!existing) return;
+      await saveDailyEntry({ ...existing, focusCompleted: completed });
+    },
+    [dailyEntries, saveDailyEntry]
+  );
+
   const resetAllData = useCallback(async () => {
     const result = await clearAllData();
     if (result.ok) {
       setProfile(DEFAULT_PROFILE);
       setDailyEntries({});
       setEveningEntries({});
+      setMiddayEntries({});
+      setWindDownEntries({});
       setErrorMessage(null);
     } else {
       setErrorMessage(result.error);
@@ -128,10 +181,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       profile,
       dailyEntries,
       eveningEntries,
+      middayEntries,
+      windDownEntries,
       updateProfile,
       completeOnboarding,
       saveDailyEntry,
       saveEveningEntry,
+      saveMiddayEntry,
+      saveWindDownEntry,
+      setFocusCompleted,
       resetAllData,
       errorMessage,
       clearErrorMessage,
@@ -145,10 +203,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       profile,
       dailyEntries,
       eveningEntries,
+      middayEntries,
+      windDownEntries,
       updateProfile,
       completeOnboarding,
       saveDailyEntry,
       saveEveningEntry,
+      saveMiddayEntry,
+      saveWindDownEntry,
+      setFocusCompleted,
       resetAllData,
       errorMessage,
       clearErrorMessage,

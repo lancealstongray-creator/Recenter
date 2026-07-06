@@ -24,8 +24,8 @@ single place to check "is X covered, and how?"
 | QA-TOD-02 | `src/utils/date.test.ts` → `greetingForNow` "afternoon" | — |
 | QA-TOD-03 | `src/utils/date.test.ts` → `greetingForNow` "evening" | — |
 | QA-TOD-04 | — | regression-checklist.md § Missed days |
-| QA-TOD-05 | N/A — not implemented | N/A |
-| QA-TOD-06 | N/A — not implemented | N/A |
+| QA-TOD-05 | `src/utils/adaptiveRhythms.test.ts` → `recommendSession` forward-scan tests | — |
+| QA-TOD-06 | `src/utils/adaptiveRhythms.test.ts` → "returns null when every session is complete" | smoke-checklist.md § Home |
 | QA-ABS-01 | — | smoke-checklist.md § Journey; regression-checklist.md § Missed days |
 | QA-ABS-02 | — | regression-checklist.md § Missed days |
 | QA-ABS-03 | — | smoke-checklist.md § Journey; regression-checklist.md § Missed days |
@@ -45,6 +45,23 @@ single place to check "is X covered, and how?"
 | QA-TIME-06 | `src/utils/pick.test.ts` | — |
 | QA-GUARD-01 | `src/flags/featureFlags.test.ts` | regression-checklist.md § Feature-flag hygiene |
 | QA-GUARD-02 | — | regression-checklist.md § Missed days (grep check) |
+| QA-GUARD-03 | `src/utils/adaptiveRhythms.test.ts` (`recommendSession` return type) | regression-checklist.md § Recommended Sessions |
+| QA-GUARD-04 | `src/utils/adaptiveRhythms.test.ts` → "never recommends a missed session" tests | regression-checklist.md § Recommended Sessions |
+| QA-HOME-01 | — | smoke-checklist.md § Home |
+| QA-HOME-02 | — | smoke-checklist.md § Home |
+| QA-HOME-03 | — | smoke-checklist.md § Home |
+| QA-HOME-04 | — | smoke-checklist.md § Home |
+| QA-HOME-05 | — | smoke-checklist.md § Home |
+| QA-COMPLETE-01 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE-02 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE-03 | — | smoke-checklist.md § Session completion |
+| QA-COMPLETE-04 | `src/context/AppContext.test.tsx` → `setFocusCompleted` persistence | smoke-checklist.md § Session completion |
+| QA-COMPLETE-05 | — | smoke-checklist.md § Session completion |
+| QA-EMPTY-01 | — | smoke-checklist.md § Home (see QA-HOME-03) |
+| QA-EMPTY-02 | — | smoke-checklist.md § Home |
+| QA-EMPTY-03 | `src/utils/adaptiveRhythms.test.ts` | smoke-checklist.md § Home |
+| QA-EMPTY-04 | — | smoke-checklist.md § Journey |
+| QA-EMPTY-05 | — | smoke-checklist.md § Home (web only) |
 
 ## Automated test inventory
 
@@ -53,8 +70,9 @@ single place to check "is X covered, and how?"
 | `src/utils/pick.test.ts` | Deterministic daily picks (QA-TIME-06) |
 | `src/utils/date.test.ts` | Date-key formatting, midnight/year rollover, greeting boundaries (QA-TOD-01→03, QA-TIME-01→03) |
 | `src/storage/storage.test.ts` | Profile load/save/merge, daily/evening entry dedup, error-safety (QA-DATA-01→05) |
-| `src/context/AppContext.test.tsx` | Session dedup, onboarding persistence/resume, onboarding hand-off, reset, relaunch survival (QA-ONB-06/07/09, QA-SES-02/03, QA-DATA-01/06/07) |
+| `src/context/AppContext.test.tsx` | Session dedup, onboarding persistence/resume, onboarding hand-off, reset, relaunch survival, focus-complete toggle (QA-ONB-06/07/09, QA-SES-02/03, QA-DATA-01/06/07, QA-COMPLETE-04) |
 | `src/navigation/types.test.ts` | Onboarding step-index resume mapping (QA-ONB-07) |
 | `src/flags/featureFlags.test.ts` | Phase 2/3 flags stay off (QA-GUARD-01) |
+| `src/utils/adaptiveRhythms.test.ts` | Deterministic time-window + forward-scan recommendation logic, never-recommend-missed rule, all-complete → null (QA-TOD-05/06, QA-GUARD-03/04, QA-EMPTY-03) |
 
-Total: 6 suites, 32 tests, all passing as of this stabilization pass.
+Total: 7 suites, 43 tests, all passing as of the Today Experience pass.

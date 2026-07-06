@@ -9,7 +9,7 @@ and edge cases rather than visual review.
 ## Automated (run first — fastest signal)
 
 - [ ] `npm run typecheck` — zero errors
-- [ ] `npm test` — all suites pass (currently 6 suites / 32 tests)
+- [ ] `npm test` — all suites pass (currently 7 suites / 43 tests)
 - [ ] If you touched `src/utils/date.ts`, `src/storage/storage.ts`, or
       `src/context/AppContext.tsx`: read the diff against the tests in
       the matching `*.test.ts(x)` file — did you change behavior the
@@ -18,10 +18,24 @@ and edge cases rather than visual review.
 ## No duplicate session completions (QA-DATA-01, QA-DATA-02)
 
 - [ ] Manually: complete a Daily Recenter session, then find a way back
-      into the flow the same day (e.g. deep-link, double-tap "Begin
-      Today" before the UI updates) and complete it again — Journey
-      still shows exactly one entry for that date, with the newest data
-- [ ] Same for Evening Reflection
+      into the flow the same day (e.g. deep-link, double-tap the
+      recommended card's begin button before the UI updates) and
+      complete it again — Journey still shows exactly one entry for that
+      date, with the newest data
+- [ ] Same for Evening Reflection, Midday Reset, and Wind Down
+
+## Recommended Sessions / Adaptive Rhythms (QA-TOD-05, QA-TOD-06, QA-GUARD-03, QA-GUARD-04)
+
+- [ ] `npm test -- src/utils/adaptiveRhythms.test.ts` passes — window
+      boundaries, forward-scan recommendation, never-recommend-missed
+      rule, all-complete → null
+- [ ] Manually: complete only the Morning session, then advance the
+      device clock (or system time) past the Midday and Evening windows
+      without completing them — Home recommends Wind Down (the next
+      upcoming type), never resurfaces Midday or Evening as "missed"
+- [ ] Manually: complete all 4 session types for today — Home shows the
+      resting empty state, no recommended card, no button
+- [ ] At no point does Home show more than one recommended session card
 
 ## No reflection/session data loss (QA-DATA-03, QA-DATA-06, QA-DATA-07)
 
