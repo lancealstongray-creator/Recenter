@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { OnboardingStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -29,9 +30,9 @@ export function ReadyScreen({}: Props) {
       </View>
       <View style={styles.center}>
         <View style={styles.mark}>
-          <Text style={styles.markGlyph}>✓</Text>
+          <Ionicons name="checkmark" size={28} color={colors.accentDark} />
         </View>
-        <Text style={styles.title}>
+        <Text style={styles.title} accessibilityRole="header">
           {draft.name.trim() ? `You're ready, ${draft.name.trim()}.` : "You're ready."}
         </Text>
         <Text style={styles.subtitle}>
@@ -39,7 +40,7 @@ export function ReadyScreen({}: Props) {
         </Text>
       </View>
       <View style={styles.footer}>
-        <PrimaryButton label="Start Recentering" onPress={handleStart} />
+        <PrimaryButton label="Begin" onPress={handleStart} />
       </View>
     </ScreenContainer>
   );
@@ -64,12 +65,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.xl,
   },
-  markGlyph: {
-    fontSize: 28,
-    color: colors.accentDark,
-  },
   title: {
-    ...typography.display,
+    ...typography.hero,
     textAlign: 'center',
     marginBottom: spacing.md,
   },
@@ -79,6 +76,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   footer: {
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
 });

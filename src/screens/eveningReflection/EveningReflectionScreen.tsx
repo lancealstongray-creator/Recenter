@@ -76,7 +76,7 @@ export function EveningReflectionScreen({ navigation }: Props) {
       eyebrow="Optional"
       title="Anything else on your mind?"
       subtitle="Completely optional — leave it blank if not."
-      primaryLabel="Finish"
+      primaryLabel="Close"
       onPrimaryPress={handleSave}
       showBack
       onBack={() => setStep(2)}
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,
-    padding: spacing.md,
+    padding: spacing.lg,
     minHeight: 120,
     textAlignVertical: 'top',
   },

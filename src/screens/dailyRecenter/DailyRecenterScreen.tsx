@@ -120,7 +120,7 @@ export function DailyRecenterScreen({ navigation }: Props) {
         eyebrow="One focus"
         title="What's the one thing you'll focus on today?"
         subtitle="Just one. Small is fine."
-        primaryLabel="Save"
+        primaryLabel="Continue"
         onPrimaryPress={handleFinish}
         primaryDisabled={focus.trim().length === 0}
         showBack
@@ -146,7 +146,7 @@ export function DailyRecenterScreen({ navigation }: Props) {
       totalSteps={TOTAL_STEPS}
       eyebrow="Encouragement"
       title={encouragement}
-      primaryLabel="Done"
+      primaryLabel="Close"
       onPrimaryPress={close}
       onClose={close}
     />
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,
-    padding: spacing.md,
-    minHeight: 100,
+    padding: spacing.lg,
+    minHeight: 96,
     textAlignVertical: 'top',
   },
 });

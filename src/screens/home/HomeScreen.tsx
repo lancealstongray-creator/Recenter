@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,9 +7,9 @@ import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { useApp } from '../../context/AppContext';
-import { getMood } from '../../constants/moods';
-import { getLifeArea } from '../../constants/lifeAreas';
+import { ENCOURAGEMENTS } from '../../constants/encouragements';
 import { todayKey, greetingForNow, formatFriendlyDate } from '../../utils/date';
+import { pickForDate } from '../../utils/pick';
 import { colors, radii, spacing, typography, shadow } from '../../theme/theme';
 
 type Props = CompositeScreenProps<
@@ -22,63 +22,63 @@ export function HomeScreen({ navigation }: Props) {
   const date = todayKey();
   const daily = dailyEntries[date];
   const evening = eveningEntries[date];
-  const mood = daily ? getMood(daily.moodId) : undefined;
-  const lifeArea = daily ? getLifeArea(daily.lifeAreaId) : undefined;
+  const dailyDone = Boolean(daily);
+  const eveningDone = Boolean(evening);
+  const encouragement = useMemo(() => pickForDate(ENCOURAGEMENTS, date), [date]);
 
   return (
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
           <Text style={styles.date}>{formatFriendlyDate(date)}</Text>
-          <Text style={styles.greeting}>
+          <Text style={styles.greeting} accessibilityRole="header">
             {greetingForNow()}
             {profile.name ? `, ${profile.name}` : ''}.
           </Text>
+          <Text style={styles.quote}>{encouragement}</Text>
         </View>
 
-        <View style={[styles.card, shadow.soft]}>
-          {daily ? (
-            <>
-              <Text style={styles.cardEyebrow}>Today's focus</Text>
-              <Text style={styles.cardTitle}>{daily.focus}</Text>
-              <Text style={styles.cardMeta}>
-                {mood ? `${mood.icon} ${mood.label}` : ''}
-                {lifeArea ? `  ·  ${lifeArea.icon} ${lifeArea.label}` : ''}
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.cardEyebrow}>Daily Recenter</Text>
-              <Text style={styles.cardTitle}>A quiet moment before your day begins.</Text>
-              <PrimaryButton
-                label="Begin your Recenter"
-                onPress={() => navigation.navigate('DailyRecenter')}
-                style={styles.cardButton}
-              />
-            </>
-          )}
-        </View>
+        {dailyDone ? (
+          <View style={styles.quietBlock}>
+            <Text style={styles.quietLabel}>Today, you're holding space for</Text>
+            <Text style={styles.quietFocus}>{daily.focus}</Text>
+          </View>
+        ) : (
+          <View style={[styles.card, shadow.soft]}>
+            <Text style={styles.cardEyebrow}>Daily Recenter</Text>
+            <Text style={styles.cardTitle}>A quiet moment before your day begins.</Text>
+            <PrimaryButton
+              label="Begin Today"
+              onPress={() => navigation.navigate('DailyRecenter')}
+              style={styles.cardButton}
+            />
+          </View>
+        )}
 
-        <View style={[styles.card, shadow.soft]}>
-          {evening ? (
-            <>
-              <Text style={styles.cardEyebrow}>Evening Reflection</Text>
-              <Text style={styles.cardTitle}>You reflected today.</Text>
-              <Text style={styles.cardMeta}>{evening.highlight}</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.cardEyebrow}>Evening Reflection</Text>
-              <Text style={styles.cardTitle}>Close your day with a short reflection.</Text>
-              <PrimaryButton
-                label="Reflect on your day"
-                variant="secondary"
-                onPress={() => navigation.navigate('EveningReflection')}
-                style={styles.cardButton}
-              />
-            </>
-          )}
-        </View>
+        {dailyDone && !eveningDone ? (
+          <View style={[styles.card, shadow.soft]}>
+            <Text style={styles.cardEyebrow}>Evening Reflection</Text>
+            <Text style={styles.cardTitle}>Take a few quiet minutes to reflect on your day.</Text>
+            <PrimaryButton
+              label="Take a Moment"
+              onPress={() => navigation.navigate('EveningReflection')}
+              style={styles.cardButton}
+            />
+          </View>
+        ) : null}
+
+        {eveningDone ? (
+          <View style={styles.quietBlock}>
+            <Text style={styles.quietLabel}>This evening, you noticed</Text>
+            <Text style={styles.quietFocus}>{evening.highlight}</Text>
+          </View>
+        ) : null}
+
+        {dailyDone && eveningDone ? (
+          <Text style={styles.restingMessage}>
+            You've shown up for yourself today. That's enough.
+          </Text>
+        ) : null}
       </ScrollView>
     </ScreenContainer>
   );
@@ -86,39 +86,55 @@ export function HomeScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   scroll: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.xxl,
+    gap: spacing.xl,
   },
   header: {
     marginBottom: spacing.sm,
   },
   date: {
-    ...typography.caption,
-    marginBottom: spacing.xs,
+    ...typography.label,
+    marginBottom: spacing.sm,
   },
   greeting: {
-    ...typography.display,
+    ...typography.hero,
+    marginBottom: spacing.md,
+  },
+  quote: {
+    ...typography.quote,
   },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
-    padding: spacing.lg,
+    padding: spacing.xl,
   },
   cardEyebrow: {
-    ...typography.caption,
+    ...typography.label,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
   cardTitle: {
     ...typography.title,
-    marginBottom: spacing.sm,
-  },
-  cardMeta: {
-    ...typography.bodyMuted,
+    marginBottom: spacing.lg,
   },
   cardButton: {
+    marginTop: spacing.xs,
+  },
+  quietBlock: {
+    paddingHorizontal: spacing.xs,
+  },
+  quietLabel: {
+    ...typography.label,
+    marginBottom: spacing.sm,
+  },
+  quietFocus: {
+    ...typography.quote,
+    color: colors.textPrimary,
+  },
+  restingMessage: {
+    ...typography.bodyMuted,
+    textAlign: 'center',
     marginTop: spacing.md,
   },
 });

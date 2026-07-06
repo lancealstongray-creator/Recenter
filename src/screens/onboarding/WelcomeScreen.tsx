@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { OnboardingStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -13,9 +14,11 @@ export function WelcomeScreen({ navigation }: Props) {
     <ScreenContainer>
       <View style={styles.center}>
         <View style={styles.mark}>
-          <Text style={styles.markGlyph}>◎</Text>
+          <Ionicons name="sunny-outline" size={28} color={colors.accentDark} />
         </View>
-        <Text style={styles.title}>Recenter</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          Recenter
+        </Text>
         <Text style={styles.subtitle}>Reconnect with what matters most, one day at a time.</Text>
       </View>
       <View style={styles.footer}>
@@ -40,21 +43,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.xl,
   },
-  markGlyph: {
-    fontSize: 30,
-    color: colors.accentDark,
-  },
   title: {
-    ...typography.display,
-    fontSize: 36,
+    ...typography.hero,
     marginBottom: spacing.md,
   },
   subtitle: {
-    ...typography.bodyMuted,
+    ...typography.quote,
     textAlign: 'center',
     maxWidth: 280,
   },
   footer: {
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
 });
