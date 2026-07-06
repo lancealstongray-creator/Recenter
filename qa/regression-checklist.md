@@ -9,7 +9,7 @@ and edge cases rather than visual review.
 ## Automated (run first — fastest signal)
 
 - [ ] `npm run typecheck` — zero errors
-- [ ] `npm test` — all suites pass (currently 7 suites / 43 tests)
+- [ ] `npm test` — all suites pass (currently 8 suites / 65 tests)
 - [ ] If you touched `src/utils/date.ts`, `src/storage/storage.ts`, or
       `src/context/AppContext.tsx`: read the diff against the tests in
       the matching `*.test.ts(x)` file — did you change behavior the
@@ -20,15 +20,21 @@ and edge cases rather than visual review.
 - [ ] Manually: complete a Daily Recenter session, then find a way back
       into the flow the same day (e.g. deep-link, double-tap the
       recommended card's begin button before the UI updates) and
-      complete it again — Journey still shows exactly one entry for that
-      date, with the newest data
+      complete it again — Archived Journey still shows exactly one entry
+      for that date, with the newest data
 - [ ] Same for Evening Reflection, Midday Reset, and Wind Down
+- [ ] Saving two Journal entries in quick succession keeps both — the
+      feed never overwrites one with the other (QA-JOURNAL-06)
 
-## Recommended Sessions / Adaptive Rhythms (QA-TOD-05, QA-TOD-06, QA-GUARD-03, QA-GUARD-04)
+## Recommended Sessions / Adaptive Rhythms (QA-TOD-05, QA-TOD-06, QA-GUARD-03, QA-GUARD-04, QA-REC-01 → QA-REC-06)
 
 - [ ] `npm test -- src/utils/adaptiveRhythms.test.ts` passes — window
       boundaries, forward-scan recommendation, never-recommend-missed
       rule, all-complete → null
+- [ ] `npm test -- src/utils/recommendation.test.ts` passes — confidence
+      only appears after a consistent rolling-window pattern, never
+      changes which session type is chosen, a single unusual day doesn't
+      flip it
 - [ ] Manually: complete only the Morning session, then advance the
       device clock (or system time) past the Midday and Evening windows
       without completing them — Home recommends Wind Down (the next
@@ -36,13 +42,16 @@ and edge cases rather than visual review.
 - [ ] Manually: complete all 4 session types for today — Home shows the
       resting empty state, no recommended card, no button
 - [ ] At no point does Home show more than one recommended session card
+- [ ] The Session Picker ("Or choose something else") always lists all 4
+      session types regardless of what's currently recommended, and
+      never shows a score/rank on any row
 
 ## No reflection/session data loss (QA-DATA-03, QA-DATA-06, QA-DATA-07)
 
 - [ ] Save a Daily Recenter entry for one day, then an Evening Reflection
       for a *different* day (change device date or wait) — reload the
       app — both entries are intact
-- [ ] Reset all data — confirm Profile, Journey, and Home all return to
+- [ ] Reset all data — confirm Profile, Journal, Archived Journey, and Home all return to
       a fresh-install state simultaneously (no partial reset)
 - [ ] Force-quit the app mid-Evening-Reflection (before tapping the final
       Close) — reopen — confirm the partial entry was *not* saved (only
@@ -54,7 +63,7 @@ and edge cases rather than visual review.
 - [ ] Advance the device clock forward several days (or change system
       date) without opening the app in between, then open it — Home
       shows a normal greeting for today, nothing referencing the gap
-- [ ] Journey shows only the days that actually have entries; no "missed"
+- [ ] Archived Journey shows only the days that actually have entries; no "missed"
       rows, no red/warning styling anywhere
 - [ ] `grep -ri "streak\|missed\|overdue" src/screens` returns nothing
       user-facing (comments referencing the *absence* of these features
@@ -77,7 +86,7 @@ and edge cases rather than visual review.
       correct date
 - [ ] Manually: set the device clock backward by a day, open the app —
       no crash; Home reflects the (now earlier) "today" consistently
-      with what Journey shows for that date
+      with what Archived Journey shows for that date
 
 ## Feature-flag hygiene (QA-GUARD-01)
 

@@ -1,9 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_PROFILE,
+  addJournalEntry as persistJournalEntry,
   clearAllData,
   loadDailyEntries,
   loadEveningEntries,
+  loadJournalEntries,
   loadMiddayEntries,
   loadProfile,
   loadWindDownEntries,
@@ -16,6 +18,7 @@ import {
 import {
   DailyRecenterEntry,
   EveningReflectionEntry,
+  JournalEntry,
   MiddayResetEntry,
   UserProfile,
   WindDownEntry,
@@ -28,12 +31,14 @@ interface AppContextValue {
   eveningEntries: Record<string, EveningReflectionEntry>;
   middayEntries: Record<string, MiddayResetEntry>;
   windDownEntries: Record<string, WindDownEntry>;
+  journalEntries: JournalEntry[];
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   completeOnboarding: (profile: Partial<UserProfile>) => Promise<void>;
   saveDailyEntry: (entry: DailyRecenterEntry) => Promise<void>;
   saveEveningEntry: (entry: EveningReflectionEntry) => Promise<void>;
   saveMiddayEntry: (entry: MiddayResetEntry) => Promise<void>;
   saveWindDownEntry: (entry: WindDownEntry) => Promise<void>;
+  addJournalEntry: (text: string, isPrayer?: boolean) => Promise<void>;
   // Marks (or unmarks) today's One Focus complete — purely informational,
   // leaving it active carries no penalty or indicator either way.
   setFocusCompleted: (date: string, completed: boolean) => Promise<void>;
@@ -55,6 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [eveningEntries, setEveningEntries] = useState<Record<string, EveningReflectionEntry>>({});
   const [middayEntries, setMiddayEntries] = useState<Record<string, MiddayResetEntry>>({});
   const [windDownEntries, setWindDownEntries] = useState<Record<string, WindDownEntry>>({});
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [justOnboarded, setJustOnboarded] = useState(false);
   const [pendingFirstFocus, setPendingFirstFocus] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -63,19 +69,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const [p, d, e, m, w] = await Promise.all([
+      const [p, d, e, m, w, j] = await Promise.all([
         loadProfile(),
         loadDailyEntries(),
         loadEveningEntries(),
         loadMiddayEntries(),
         loadWindDownEntries(),
+        loadJournalEntries(),
       ]);
       setProfile(p.ok ? p.data : DEFAULT_PROFILE);
       setDailyEntries(d.ok ? d.data : {});
       setEveningEntries(e.ok ? e.data : {});
       setMiddayEntries(m.ok ? m.data : {});
       setWindDownEntries(w.ok ? w.data : {});
-      if (!p.ok || !d.ok || !e.ok || !m.ok || !w.ok) {
+      setJournalEntries(j.ok ? j.data : []);
+      if (!p.ok || !d.ok || !e.ok || !m.ok || !w.ok || !j.ok) {
         setErrorMessage('We had trouble loading your data. Starting fresh for now.');
       }
       setIsLoading(false);
@@ -152,6 +160,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const addJournalEntry = useCallback(async (text: string, isPrayer?: boolean) => {
+    const entry: JournalEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      isPrayer,
+      createdAt: new Date().toISOString(),
+    };
+    const result = await persistJournalEntry(entry);
+    if (result.ok) {
+      setJournalEntries(result.data);
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(result.error);
+    }
+  }, []);
+
   const setFocusCompleted = useCallback(
     async (date: string, completed: boolean) => {
       const existing = dailyEntries[date];
@@ -169,6 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setEveningEntries({});
       setMiddayEntries({});
       setWindDownEntries({});
+      setJournalEntries([]);
       setErrorMessage(null);
     } else {
       setErrorMessage(result.error);
@@ -183,12 +208,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       eveningEntries,
       middayEntries,
       windDownEntries,
+      journalEntries,
       updateProfile,
       completeOnboarding,
       saveDailyEntry,
       saveEveningEntry,
       saveMiddayEntry,
       saveWindDownEntry,
+      addJournalEntry,
       setFocusCompleted,
       resetAllData,
       errorMessage,
@@ -205,12 +232,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       eveningEntries,
       middayEntries,
       windDownEntries,
+      journalEntries,
       updateProfile,
       completeOnboarding,
       saveDailyEntry,
       saveEveningEntry,
       saveMiddayEntry,
       saveWindDownEntry,
+      addJournalEntry,
       setFocusCompleted,
       resetAllData,
       errorMessage,

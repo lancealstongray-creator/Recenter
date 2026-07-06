@@ -11,6 +11,7 @@ import { EveningReflectionScreen } from '../screens/eveningReflection/EveningRef
 import { MiddayResetScreen } from '../screens/middayReset/MiddayResetScreen';
 import { WindDownScreen } from '../screens/windDown/WindDownScreen';
 import { TourScreen } from '../screens/tour/TourScreen';
+import { HistoryScreen } from '../screens/history/HistoryScreen';
 import { useApp } from '../context/AppContext';
 import { colors, motion } from '../theme/theme';
 
@@ -89,6 +90,7 @@ export function RootNavigator() {
           component={TourScreen}
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen name="ArchivedJourney" component={HistoryScreen} options={{ animation: 'slide_from_right' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

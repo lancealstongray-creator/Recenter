@@ -24,8 +24,8 @@ const STOPS: { icon: IoniconName; title: string; body: string }[] = [
   },
   {
     icon: 'book-outline',
-    title: 'Journey',
-    body: 'A record of the moments you’ve shown up for yourself — never a scoreboard.',
+    title: 'Journal',
+    body: 'A warm space to write and reflect — your own words, whenever you want them.',
   },
   {
     icon: 'person-outline',

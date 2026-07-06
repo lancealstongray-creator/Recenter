@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,11 +7,14 @@ import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuietReveal } from '../../components/QuietReveal';
+import { InlineNotice } from '../../components/InlineNotice';
+import { SessionPickerSheet } from '../../components/SessionPickerSheet';
 import { useApp } from '../../context/AppContext';
 import { ENCOURAGEMENTS } from '../../constants/encouragements';
 import { CALMING_MESSAGES } from '../../constants/calmingMessages';
 import { SESSION_META } from '../../constants/sessionTypes';
-import { recommendSession, getTimeWindow } from '../../utils/adaptiveRhythms';
+import { getTimeWindow } from '../../utils/adaptiveRhythms';
+import { getRecommendation } from '../../utils/recommendation';
 import { useIsOffline } from '../../utils/connectivity';
 import { todayKey, greetingForNow, formatFriendlyDate } from '../../utils/date';
 import { pickForDate } from '../../utils/pick';
@@ -38,8 +41,10 @@ const SESSION_BEGIN_LABEL: Record<SessionType, string> = {
 };
 
 export function HomeScreen({ navigation }: Props) {
-  const { profile, dailyEntries, eveningEntries, middayEntries, windDownEntries, updateProfile } = useApp();
+  const { profile, dailyEntries, eveningEntries, middayEntries, windDownEntries, updateProfile, errorMessage, clearErrorMessage } =
+    useApp();
   const isOffline = useIsOffline();
+  const [isPickerVisible, setIsPickerVisible] = useState(false);
   const date = todayKey();
   const now = useMemo(() => new Date(), [date]);
 
@@ -54,12 +59,25 @@ export function HomeScreen({ navigation }: Props) {
     evening: Boolean(evening),
     windDown: Boolean(windDown),
   };
-  const recommended = useMemo(() => recommendSession({ now, completedToday }), [now, completedToday]);
 
-  // "Typical usage patterns stored locally" — a light, honest, deterministic
-  // use of local history: has the user ever completed this session type
-  // before? Used only to soften the copy for a first-timer, never to
-  // change which session is recommended (see adaptiveRhythms.ts).
+  // "Typical usage patterns stored locally" — every date each session
+  // type has ever been completed, feeding the confidence layer in
+  // recommendation.ts. Selection of WHICH session is recommended is
+  // still owned entirely by adaptiveRhythms.ts; this only lets Today's
+  // copy read as a personal suggestion once a real pattern has formed.
+  const completedDatesByType: Record<SessionType, string[]> = {
+    morning: Object.keys(dailyEntries),
+    midday: Object.keys(middayEntries),
+    evening: Object.keys(eveningEntries),
+    windDown: Object.keys(windDownEntries),
+  };
+  const recommendation = useMemo(
+    () => getRecommendation({ now, completedToday, completedDatesByType }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [now, completedToday, dailyEntries, middayEntries, eveningEntries, windDownEntries]
+  );
+  const recommended = recommendation?.sessionType ?? null;
+
   const hasEverUsedType: Record<SessionType, boolean> = {
     morning: Object.keys(dailyEntries).length > 0,
     midday: Object.keys(middayEntries).length > 0,
@@ -90,6 +108,8 @@ export function HomeScreen({ navigation }: Props) {
           </View>
         ) : null}
 
+        {errorMessage ? <InlineNotice message={errorMessage} onRetry={clearErrorMessage} /> : null}
+
         {/* 1. Time-aware greeting */}
         <View style={styles.header}>
           <Text style={styles.date}>{formatFriendlyDate(date)}</Text>
@@ -105,19 +125,26 @@ export function HomeScreen({ navigation }: Props) {
         {recommended ? (
           <QuietReveal>
             <View style={[styles.card, elevation.soft]}>
-              <Text style={styles.cardEyebrow}>{SESSION_META[recommended].label}</Text>
+              <Text style={styles.cardEyebrow}>
+                {recommendation?.confident ? 'Suggested for you' : SESSION_META[recommended].label}
+              </Text>
               <Text style={styles.cardTitle}>
                 {isFirstTimeEver
                   ? "Let's begin your first moment together."
                   : !hasEverUsedType[recommended]
                     ? `A first ${SESSION_META[recommended].label.toLowerCase()} for you.`
-                    : SESSION_META[recommended].blurb}
+                    : recommendation?.confident && recommendation.reasonCopy
+                      ? recommendation.reasonCopy
+                      : SESSION_META[recommended].blurb}
               </Text>
               <PrimaryButton
                 label={SESSION_BEGIN_LABEL[recommended]}
                 onPress={() => beginSession(recommended)}
                 style={styles.cardButton}
               />
+              <Pressable onPress={() => setIsPickerVisible(true)} hitSlop={8} style={styles.pickerLink}>
+                <Text style={styles.pickerLinkText}>Or choose something else</Text>
+              </Pressable>
             </View>
           </QuietReveal>
         ) : (
@@ -175,6 +202,11 @@ export function HomeScreen({ navigation }: Props) {
           </View>
         ) : null}
       </ScrollView>
+      <SessionPickerSheet
+        visible={isPickerVisible}
+        onClose={() => setIsPickerVisible(false)}
+        onSelect={beginSession}
+      />
     </ScreenContainer>
   );
 }
@@ -226,6 +258,14 @@ const styles = StyleSheet.create({
   },
   cardButton: {
     marginTop: spacing.xs,
+  },
+  pickerLink: {
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  pickerLinkText: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
   quietBlock: {
     backgroundColor: colors.surfaceMuted,

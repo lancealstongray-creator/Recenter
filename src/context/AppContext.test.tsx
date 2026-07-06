@@ -134,4 +134,61 @@ describe('AppContext — returning users resume without friction', () => {
     });
     expect(result.current.profile).toEqual(DEFAULT_PROFILE);
   });
+
+  it('resetAllData also clears journal entries', async () => {
+    const { result } = await renderApp();
+    await act(async () => {
+      await result.current.addJournalEntry('A quiet thought');
+    });
+    expect(result.current.journalEntries).toHaveLength(1);
+    await act(async () => {
+      await result.current.resetAllData();
+    });
+    expect(result.current.journalEntries).toEqual([]);
+  });
+});
+
+describe('AppContext — Journal entries', () => {
+  it('addJournalEntry appends a new entry with a generated id and timestamp', async () => {
+    const { result } = await renderApp();
+    await act(async () => {
+      await result.current.addJournalEntry('Grateful for a quiet morning');
+    });
+    expect(result.current.journalEntries).toHaveLength(1);
+    expect(result.current.journalEntries[0].text).toBe('Grateful for a quiet morning');
+    expect(result.current.journalEntries[0].id).toBeTruthy();
+    expect(result.current.journalEntries[0].createdAt).toBeTruthy();
+    expect(result.current.journalEntries[0].isPrayer).toBeUndefined();
+  });
+
+  it('multiple entries can be added the same day without overwriting each other', async () => {
+    const { result } = await renderApp();
+    await act(async () => {
+      await result.current.addJournalEntry('First entry');
+    });
+    await act(async () => {
+      await result.current.addJournalEntry('Second entry');
+    });
+    expect(result.current.journalEntries.map((e) => e.text)).toEqual(['First entry', 'Second entry']);
+  });
+
+  it('marks an entry as a prayer when requested', async () => {
+    const { result } = await renderApp();
+    await act(async () => {
+      await result.current.addJournalEntry('A prayer of thanks', true);
+    });
+    expect(result.current.journalEntries[0].isPrayer).toBe(true);
+  });
+
+  it('journal entries survive a fresh provider mount (simulated app relaunch)', async () => {
+    const first = await renderApp();
+    await act(async () => {
+      await first.result.current.addJournalEntry('Persisted thought');
+    });
+    await first.unmount();
+
+    const second = await renderApp();
+    expect(second.result.current.journalEntries).toHaveLength(1);
+    expect(second.result.current.journalEntries[0].text).toBe('Persisted thought');
+  });
 });

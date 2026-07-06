@@ -1,15 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   DEFAULT_PROFILE,
+  addJournalEntry,
   clearAllData,
   loadDailyEntries,
   loadEveningEntries,
+  loadJournalEntries,
   loadProfile,
   saveDailyEntry,
   saveEveningEntry,
   saveProfile,
 } from './storage';
-import { DailyRecenterEntry, EveningReflectionEntry } from '../types';
+import { DailyRecenterEntry, EveningReflectionEntry, JournalEntry } from '../types';
 
 const dailyEntry = (overrides: Partial<DailyRecenterEntry> = {}): DailyRecenterEntry => ({
   date: '2026-07-06',
@@ -103,6 +105,30 @@ describe('saveEveningEntry — no duplicate completions, no data loss', () => {
   });
 });
 
+describe('loadJournalEntries / addJournalEntry', () => {
+  const journalEntry = (overrides: Partial<JournalEntry> = {}): JournalEntry => ({
+    id: 'entry-1',
+    text: 'A quiet thought.',
+    createdAt: '2026-07-06T08:00:00.000Z',
+    ...overrides,
+  });
+
+  it('returns an empty list when nothing has been saved', async () => {
+    const result = await loadJournalEntries();
+    expect(result).toEqual({ ok: true, data: [] });
+  });
+
+  it('appends entries rather than overwriting — multiple entries per day are allowed', async () => {
+    await addJournalEntry(journalEntry({ id: 'a', text: 'First' }));
+    await addJournalEntry(journalEntry({ id: 'b', text: 'Second' }));
+    const result = await loadJournalEntries();
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.map((e) => e.text)).toEqual(['First', 'Second']);
+    }
+  });
+});
+
 describe('error safety', () => {
   it('loadProfile returns a typed error instead of throwing when storage is corrupt', async () => {
     await AsyncStorage.setItem('@recenter/profile', 'not valid json{{{');
@@ -119,16 +145,23 @@ describe('error safety', () => {
 });
 
 describe('clearAllData', () => {
-  it('removes profile, daily entries, and evening entries', async () => {
+  it('removes profile, daily entries, evening entries, and journal entries', async () => {
     await saveProfile({ ...DEFAULT_PROFILE, name: 'Lance' });
     await saveDailyEntry(dailyEntry());
     await saveEveningEntry(eveningEntry());
+    await addJournalEntry({ id: 'a', text: 'A thought', createdAt: '2026-07-06T08:00:00.000Z' });
 
     await clearAllData();
 
-    const [profile, daily, evening] = await Promise.all([loadProfile(), loadDailyEntries(), loadEveningEntries()]);
+    const [profile, daily, evening, journal] = await Promise.all([
+      loadProfile(),
+      loadDailyEntries(),
+      loadEveningEntries(),
+      loadJournalEntries(),
+    ]);
     expect(profile).toEqual({ ok: true, data: DEFAULT_PROFILE });
     expect(daily).toEqual({ ok: true, data: {} });
     expect(evening).toEqual({ ok: true, data: {} });
+    expect(journal).toEqual({ ok: true, data: [] });
   });
 });

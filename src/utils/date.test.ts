@@ -1,4 +1,12 @@
-import { __setClockForTests, todayKey, toDateKey, greetingForNow, formatMonthLabel } from './date';
+import {
+  __setClockForTests,
+  todayKey,
+  toDateKey,
+  greetingForNow,
+  formatMonthLabel,
+  formatSeasonLabel,
+  monthsSince,
+} from './date';
 
 afterEach(() => {
   __setClockForTests(null);
@@ -57,5 +65,45 @@ describe('greetingForNow', () => {
 describe('formatMonthLabel', () => {
   it('formats a date key into a month/year label', () => {
     expect(formatMonthLabel('2026-07-06')).toMatch(/July.*2026/);
+  });
+});
+
+describe('formatSeasonLabel', () => {
+  it('labels June as Early Summer, matching the design system example', () => {
+    expect(formatSeasonLabel('2026-06-15')).toBe('Early Summer');
+  });
+
+  it('labels the middle month of a season with no qualifier', () => {
+    expect(formatSeasonLabel('2026-07-15')).toBe('Summer');
+  });
+
+  it('labels the last month of a season as Late', () => {
+    expect(formatSeasonLabel('2026-08-15')).toBe('Late Summer');
+  });
+
+  it('labels plain Winter, matching the design system example', () => {
+    expect(formatSeasonLabel('2026-01-15')).toBe('Winter');
+  });
+
+  it('wraps December into Winter (Early)', () => {
+    expect(formatSeasonLabel('2026-12-15')).toBe('Early Winter');
+  });
+
+  it('never includes a year in the label', () => {
+    expect(formatSeasonLabel('2026-07-15')).not.toMatch(/\d{4}/);
+  });
+});
+
+describe('monthsSince', () => {
+  it('reads as "a few weeks" for a date less than a month ago', () => {
+    expect(monthsSince('2026-06-20', new Date(2026, 6, 6))).toBe('a few weeks');
+  });
+
+  it('pluralizes correctly for exactly one month', () => {
+    expect(monthsSince('2026-06-01', new Date(2026, 6, 6))).toBe('1 month');
+  });
+
+  it('pluralizes correctly for multiple months', () => {
+    expect(monthsSince('2026-04-01', new Date(2026, 6, 6))).toBe('3 months');
   });
 });

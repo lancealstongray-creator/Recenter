@@ -10,6 +10,10 @@ export type RootStackParamList = {
   MiddayReset: undefined;
   WindDown: undefined;
   Tour: undefined;
+  // Reframed History — reached via a link from Journal or Profile, never
+  // a tab. Route name is new; the underlying screen component/file stays
+  // HistoryScreen.tsx to avoid unnecessary rename churn.
+  ArchivedJourney: undefined;
 };
 
 export type OnboardingStackParamList = {
@@ -34,6 +38,9 @@ export const ONBOARDING_STEPS: (keyof OnboardingStackParamList)[] = [
 
 export type MainTabParamList = {
   Home: undefined;
-  History: undefined;
+  // Journal is the primary reflection/writing destination. The old
+  // History/Journey tab is retired from the tab bar entirely — its
+  // content lives on as ArchivedJourney, reached via a link.
+  Journal: undefined;
   Profile: undefined;
 };
