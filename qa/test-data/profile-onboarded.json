@@ -1,0 +1,10 @@
+{
+  "name": "Lance",
+  "lifeAreaIds": ["health", "rest", "growth"],
+  "onboardingComplete": true,
+  "onboardingStep": 5,
+  "faithPreference": "no",
+  "notificationsEnabled": false,
+  "draftFocus": "",
+  "hasSeenTour": true
+}

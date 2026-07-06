@@ -1,0 +1,37 @@
+{
+  "2026-06-20": {
+    "date": "2026-06-20",
+    "moodId": "calm",
+    "lifeAreaId": "health",
+    "focus": "Take a short walk today",
+    "completedAt": "2026-06-20T08:00:00.000Z"
+  },
+  "2026-06-21": {
+    "date": "2026-06-21",
+    "moodId": "energized",
+    "lifeAreaId": "growth",
+    "focus": "Read a few pages of something meaningful",
+    "completedAt": "2026-06-21T07:45:00.000Z"
+  },
+  "2026-06-22": {
+    "date": "2026-06-22",
+    "moodId": "tired",
+    "lifeAreaId": "rest",
+    "focus": "Rest when you need to, without guilt",
+    "completedAt": "2026-06-22T09:10:00.000Z"
+  },
+  "2026-07-02": {
+    "date": "2026-07-02",
+    "moodId": "grateful",
+    "lifeAreaId": "family",
+    "focus": "Be fully present with your family today",
+    "completedAt": "2026-07-02T08:30:00.000Z"
+  },
+  "2026-07-06": {
+    "date": "2026-07-06",
+    "moodId": "calm",
+    "lifeAreaId": "health",
+    "focus": "Take a short walk today",
+    "completedAt": "2026-07-06T08:00:00.000Z"
+  }
+}
