@@ -1,5 +1,18 @@
+// A single injectable "now" so tests can exercise midnight, timezone, and
+// missed-day scenarios deterministically. Production code never passes an
+// argument, so behavior is unchanged — this is purely for testability.
+let clockOverride: (() => Date) | null = null;
+
+export function __setClockForTests(fn: (() => Date) | null): void {
+  clockOverride = fn;
+}
+
+function now(): Date {
+  return clockOverride ? clockOverride() : new Date();
+}
+
 export function todayKey(): string {
-  return toDateKey(new Date());
+  return toDateKey(now());
 }
 
 export function toDateKey(date: Date): string {
@@ -22,7 +35,7 @@ export function formatMonthLabel(dateKey: string): string {
 }
 
 export function greetingForNow(): string {
-  const hour = new Date().getHours();
+  const hour = now().getHours();
   if (hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';

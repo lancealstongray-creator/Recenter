@@ -1,0 +1,10 @@
+{
+  "name": "",
+  "lifeAreaIds": ["health", "rest", "growth"],
+  "onboardingComplete": false,
+  "onboardingStep": 3,
+  "faithPreference": null,
+  "notificationsEnabled": false,
+  "draftFocus": "",
+  "hasSeenTour": false
+}

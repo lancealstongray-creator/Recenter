@@ -30,27 +30,49 @@ npm run android    # requires Android Studio / emulator
 npm run web        # runs in a browser at http://localhost:8081
 ```
 
+## Test, debug, verify
+
+See **`qa/README.md`** for the full workflow. Quick reference:
+
+```bash
+npm run typecheck    # tsc --noEmit
+npm test             # run the Jest suite once
+npm run test:watch   # Jest in watch mode
+npm run build        # typecheck + expo export --platform web
+npm run verify       # typecheck + test — same as the pre-commit hook runs
+```
+
+A Husky pre-commit hook (`.husky/pre-commit`) runs `npm run verify`
+automatically; a failing verify blocks the commit. `.github/workflows/ci.yml`
+runs the same checks on every push/PR.
+
+Environment variables: none required today — see `.env.example`.
+
 ## Project structure
 
 ```
-App.tsx                        # entry point, wraps app in providers
+App.tsx                        # entry point, loads fonts, wraps app in providers
+babel.config.js                # required for both Expo and Jest transforms
+jest.setup.ts                  # global test setup (mocks AsyncStorage)
 src/
-  components/                  # shared UI (buttons, layouts, chips, etc.)
-  constants/                   # life areas, moods, evening prompts, encouragements
-  context/                     # AppContext (profile/entries) + onboarding draft state
+  components/                  # shared UI (buttons, layouts, chips, motion helpers, etc.)
+  constants/                   # life areas, moods, evening prompts, encouragements, focus suggestions
+  context/                     # AppContext — the single source of truth for profile/entries/transient state
   flags/                       # Phase 2/3 feature flags (all off, not wired to any UI)
   navigation/                  # RootNavigator, OnboardingNavigator, MainTabNavigator
   screens/
-    onboarding/                # 7-screen onboarding flow
+    onboarding/                # 6-screen onboarding flow (Welcome → Notifications)
     home/                      # Home tab
-    history/                   # History tab
+    history/                   # Journey tab (route/component/file still named History; label is "Journey")
     profile/                   # Profile tab
-    dailyRecenter/             # Daily Recenter modal flow
+    dailyRecenter/             # Daily Recenter modal flow (also runs the real first Morning Session)
     eveningReflection/         # Evening Reflection modal flow
-  storage/                     # AsyncStorage read/write helpers
-  theme/                       # colors, spacing, typography
+    tour/                      # Optional 4-stop app tour
+  storage/                     # AsyncStorage read/write helpers, error-safe (typed ok/error results)
+  theme/                       # colors, spacing, typography, elevation, motion tokens
   types/                       # shared TypeScript types
-  utils/                       # date formatting, deterministic daily picks
+  utils/                       # date (mockable clock), deterministic daily picks, motion hooks, notifications
+qa/                            # test plan, checklists, bug template, coverage map, fixtures — see qa/README.md
 ```
 
 ## Notes
