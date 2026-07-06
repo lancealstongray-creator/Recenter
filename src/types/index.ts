@@ -27,8 +27,16 @@ export interface EveningReflectionEntry {
   completedAt: string; // ISO timestamp
 }
 
+export type FaithPreference = 'faith' | 'general' | 'decide_later' | null;
+
 export interface UserProfile {
   name: string;
   lifeAreaIds: string[];
   onboardingComplete: boolean;
+  // Onboarding progress + answers, persisted so an interrupted onboarding
+  // resumes at the right screen with prior choices intact.
+  onboardingStep: number;
+  faithPreference: FaithPreference;
+  notificationsEnabled: boolean;
+  draftFocus: string;
 }

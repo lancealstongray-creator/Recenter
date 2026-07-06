@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
@@ -17,10 +17,19 @@ type Props = NativeStackScreenProps<RootStackParamList, 'DailyRecenter'>;
 const TOTAL_STEPS = 5;
 
 export function DailyRecenterScreen({ navigation }: Props) {
-  const { profile, saveDailyEntry } = useApp();
+  const { profile, saveDailyEntry, pendingFirstFocus, clearPendingFirstFocus } = useApp();
   const [step, setStep] = useState(0);
   const [moodId, setMoodId] = useState<string | null>(null);
-  const [focus, setFocus] = useState('');
+  // Seeds from the focus chosen during onboarding's One Focus Setup, if
+  // any — consumed once so later sessions start blank as usual.
+  const [focus, setFocus] = useState(pendingFirstFocus);
+
+  useEffect(() => {
+    if (pendingFirstFocus) {
+      clearPendingFirstFocus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const date = todayKey();
   const areaIds = profile.lifeAreaIds.length > 0 ? profile.lifeAreaIds : LIFE_AREAS.map((a) => a.id);

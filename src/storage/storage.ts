@@ -11,6 +11,10 @@ export const DEFAULT_PROFILE: UserProfile = {
   name: '',
   lifeAreaIds: [],
   onboardingComplete: false,
+  onboardingStep: 0,
+  faithPreference: null,
+  notificationsEnabled: false,
+  draftFocus: '',
 };
 
 export async function loadProfile(): Promise<UserProfile> {

@@ -5,11 +5,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { OnboardingStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { useApp } from '../../context/AppContext';
 import { colors, spacing, typography } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
 
 export function WelcomeScreen({ navigation }: Props) {
+  const { updateProfile } = useApp();
+
+  async function handleBegin() {
+    await updateProfile({ onboardingStep: 1 });
+    navigation.navigate('WhatIsRecenter');
+  }
+
   return (
     <ScreenContainer>
       <View style={styles.center}>
@@ -22,7 +30,7 @@ export function WelcomeScreen({ navigation }: Props) {
         <Text style={styles.subtitle}>Reconnect with what matters most, one day at a time.</Text>
       </View>
       <View style={styles.footer}>
-        <PrimaryButton label="Begin" onPress={() => navigation.navigate('Philosophy')} />
+        <PrimaryButton label="Begin" onPress={handleBegin} />
       </View>
     </ScreenContainer>
   );

@@ -21,6 +21,12 @@ interface AppContextValue {
   saveDailyEntry: (entry: DailyRecenterEntry) => Promise<void>;
   saveEveningEntry: (entry: EveningReflectionEntry) => Promise<void>;
   resetAllData: () => Promise<void>;
+  // Transient (not persisted) hand-off from onboarding into the user's
+  // real first Morning Session — never a simulated tutorial.
+  justOnboarded: boolean;
+  pendingFirstFocus: string;
+  clearJustOnboarded: () => void;
+  clearPendingFirstFocus: () => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -30,6 +36,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [dailyEntries, setDailyEntries] = useState<Record<string, DailyRecenterEntry>>({});
   const [eveningEntries, setEveningEntries] = useState<Record<string, EveningReflectionEntry>>({});
+  const [justOnboarded, setJustOnboarded] = useState(false);
+  const [pendingFirstFocus, setPendingFirstFocus] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -52,12 +60,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const completeOnboarding = useCallback(
     async (partial: Partial<UserProfile>) => {
-      const next = { ...profile, ...partial, onboardingComplete: true };
+      const next = { ...profile, ...partial, onboardingComplete: true, draftFocus: '' };
       setProfile(next);
       await persistProfile(next);
+      setPendingFirstFocus(partial.draftFocus ?? profile.draftFocus ?? '');
+      setJustOnboarded(true);
     },
     [profile]
   );
+
+  const clearJustOnboarded = useCallback(() => {
+    setJustOnboarded(false);
+  }, []);
+
+  const clearPendingFirstFocus = useCallback(() => {
+    setPendingFirstFocus('');
+  }, []);
 
   const saveDailyEntry = useCallback(async (entry: DailyRecenterEntry) => {
     const next = await persistDailyEntry(entry);
@@ -87,8 +105,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveDailyEntry,
       saveEveningEntry,
       resetAllData,
+      justOnboarded,
+      pendingFirstFocus,
+      clearJustOnboarded,
+      clearPendingFirstFocus,
     }),
-    [isLoading, profile, dailyEntries, eveningEntries, updateProfile, completeOnboarding, saveDailyEntry, saveEveningEntry, resetAllData]
+    [
+      isLoading,
+      profile,
+      dailyEntries,
+      eveningEntries,
+      updateProfile,
+      completeOnboarding,
+      saveDailyEntry,
+      saveEveningEntry,
+      resetAllData,
+      justOnboarded,
+      pendingFirstFocus,
+      clearJustOnboarded,
+      clearPendingFirstFocus,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

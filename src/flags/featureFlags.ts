@@ -10,7 +10,6 @@ export const FEATURE_FLAGS = {
     socialSharing: false,
     customLifeAreas: false,
     multipleDailyFocuses: false,
-    reminderNotifications: false,
     insightsDashboard: false,
   },
   phase3: {
