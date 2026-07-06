@@ -3,6 +3,8 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { FlowLayout } from '../../components/FlowLayout';
+import { ScreenContainer } from '../../components/ScreenContainer';
+import { PrimaryButton } from '../../components/PrimaryButton';
 import { SelectChip } from '../../components/SelectChip';
 import { useApp } from '../../context/AppContext';
 import { MOODS } from '../../constants/moods';
@@ -17,16 +19,24 @@ type Props = NativeStackScreenProps<RootStackParamList, 'DailyRecenter'>;
 const TOTAL_STEPS = 5;
 
 export function DailyRecenterScreen({ navigation }: Props) {
-  const { profile, saveDailyEntry, pendingFirstFocus, clearPendingFirstFocus } = useApp();
+  const { profile, saveDailyEntry, pendingFirstFocus, clearPendingFirstFocus, justOnboarded, clearJustOnboarded } =
+    useApp();
   const [step, setStep] = useState(0);
   const [moodId, setMoodId] = useState<string | null>(null);
   // Seeds from the focus chosen during onboarding's One Focus Setup, if
   // any — consumed once so later sessions start blank as usual.
   const [focus, setFocus] = useState(pendingFirstFocus);
+  // Captured once at mount: this is the user's real first Morning Session,
+  // run through the exact same engine as every other day. Only this run
+  // gets the extra "You're Ready" step before returning to Home.
+  const [isFirstSession] = useState(justOnboarded);
 
   useEffect(() => {
     if (pendingFirstFocus) {
       clearPendingFirstFocus();
+    }
+    if (justOnboarded) {
+      clearJustOnboarded();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -149,16 +159,37 @@ export function DailyRecenterScreen({ navigation }: Props) {
     );
   }
 
+  if (step === 4) {
+    return (
+      <FlowLayout
+        step={4}
+        totalSteps={TOTAL_STEPS}
+        eyebrow="Encouragement"
+        title={encouragement}
+        primaryLabel="Close"
+        onPrimaryPress={isFirstSession ? () => setStep(5) : close}
+        onClose={close}
+      />
+    );
+  }
+
   return (
-    <FlowLayout
-      step={4}
-      totalSteps={TOTAL_STEPS}
-      eyebrow="Encouragement"
-      title={encouragement}
-      primaryLabel="Close"
-      onPrimaryPress={close}
-      onClose={close}
-    />
+    <ScreenContainer>
+      <View style={styles.readyCenter}>
+        <View style={styles.readyMark}>
+          <Text style={styles.readyMarkGlyph}>✓</Text>
+        </View>
+        <Text style={styles.readyTitle} accessibilityRole="header">
+          You're ready.
+        </Text>
+        <Text style={styles.readySubtitle}>
+          That's the whole practice — a quiet moment, morning and evening. Nothing else to set up.
+        </Text>
+      </View>
+      <View style={styles.readyFooter}>
+        <PrimaryButton label="Continue to Home" onPress={close} />
+      </View>
+    </ScreenContainer>
   );
 }
 
@@ -167,6 +198,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+  },
+  readyCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  readyMark: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+  },
+  readyMarkGlyph: {
+    fontSize: 28,
+    color: colors.accentDark,
+  },
+  readyTitle: {
+    ...typography.hero,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  readySubtitle: {
+    ...typography.bodyMuted,
+    textAlign: 'center',
+    maxWidth: 300,
+  },
+  readyFooter: {
+    paddingBottom: spacing.xl,
   },
   reminderCard: {
     backgroundColor: colors.accentSoft,
