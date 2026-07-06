@@ -1,7 +1,8 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing, typography } from '../theme/theme';
+import { usePressScale } from '../utils/motion';
 
 interface Props {
   title: string;
@@ -11,24 +12,30 @@ interface Props {
 }
 
 export function SelectionCard({ title, description, selected, onPress }: Props) {
+  const { scale, onPressIn, onPressOut } = usePressScale();
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.card, selected && styles.cardSelected]}
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      accessibilityState={{ selected }}
-    >
-      <View style={styles.text}>
-        <Text style={styles.title}>{title}</Text>
-        {description ? <Text style={styles.description}>{description}</Text> : null}
-      </View>
-      <Ionicons
-        name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-        size={22}
-        color={selected ? colors.accent : colors.textTertiary}
-      />
-    </Pressable>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={[styles.card, selected && styles.cardSelected]}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        accessibilityState={{ selected }}
+      >
+        <View style={styles.text}>
+          <Text style={styles.title}>{title}</Text>
+          {description ? <Text style={styles.description}>{description}</Text> : null}
+        </View>
+        <Ionicons
+          name={selected ? 'checkmark-circle' : 'ellipse-outline'}
+          size={22}
+          color={selected ? colors.accent : colors.textTertiary}
+        />
+      </Pressable>
+    </Animated.View>
   );
 }
 

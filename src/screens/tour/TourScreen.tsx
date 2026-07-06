@@ -24,7 +24,7 @@ const STOPS: { icon: IoniconName; title: string; body: string }[] = [
   },
   {
     icon: 'book-outline',
-    title: 'History',
+    title: 'Journey',
     body: 'A record of the moments you’ve shown up for yourself — never a scoreboard.',
   },
   {

@@ -6,11 +6,14 @@ import { colors, spacing } from '../theme/theme';
 interface Props {
   children: React.ReactNode;
   style?: ViewStyle;
+  // Evening Reflection only: a slightly warmer/dimmer background so the
+  // evening moment reads distinct from morning, no layout change.
+  backgroundColor?: string;
 }
 
-export function ScreenContainer({ children, style }: Props) {
+export function ScreenContainer({ children, style, backgroundColor }: Props) {
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safe, backgroundColor ? { backgroundColor } : null]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

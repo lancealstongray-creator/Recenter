@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from '../../navigation/types';
 import { OnboardingLayout } from '../../components/OnboardingLayout';
 import { useApp } from '../../context/AppContext';
-import { colors, spacing, typography } from '../../theme/theme';
+import { spacing, typography } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'WhatIsRecenter'>;
 
@@ -36,10 +36,9 @@ export function WhatIsRecenterScreen({ navigation }: Props) {
     >
       <View style={styles.list}>
         {POINTS.map((point) => (
-          <View key={point} style={styles.row}>
-            <Text style={styles.bullet}>—</Text>
-            <Text style={styles.point}>{point}</Text>
-          </View>
+          <Text key={point} style={styles.point}>
+            {point}
+          </Text>
         ))}
       </View>
     </OnboardingLayout>
@@ -48,17 +47,9 @@ export function WhatIsRecenterScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  bullet: {
-    color: colors.accent,
+    gap: spacing.lg,
   },
   point: {
     ...typography.body,
-    flex: 1,
   },
 });

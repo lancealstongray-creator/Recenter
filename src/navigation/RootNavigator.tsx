@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from './types';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
@@ -9,9 +10,29 @@ import { DailyRecenterScreen } from '../screens/dailyRecenter/DailyRecenterScree
 import { EveningReflectionScreen } from '../screens/eveningReflection/EveningReflectionScreen';
 import { TourScreen } from '../screens/tour/TourScreen';
 import { useApp } from '../context/AppContext';
-import { colors } from '../theme/theme';
+import { colors, motion } from '../theme/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function LoadingMark() {
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: motion.duration.slow,
+      useNativeDriver: true,
+    }).start();
+  }, [opacity]);
+
+  return (
+    <View style={styles.loadingContainer}>
+      <Animated.View style={[styles.mark, { opacity }]}>
+        <Ionicons name="sunny-outline" size={28} color={colors.accentDark} />
+      </Animated.View>
+    </View>
+  );
+}
 
 export function RootNavigator() {
   const { isLoading, profile, justOnboarded } = useApp();
@@ -30,11 +51,7 @@ export function RootNavigator() {
   }, [justOnboarded, navigationRef]);
 
   if (isLoading) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.accent} />
-      </View>
-    );
+    return <LoadingMark />;
   }
 
   return (
@@ -64,3 +81,20 @@ export function RootNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  mark: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,16 +1,17 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { QuietReveal } from '../../components/QuietReveal';
 import { useApp } from '../../context/AppContext';
 import { ENCOURAGEMENTS } from '../../constants/encouragements';
 import { todayKey, greetingForNow, formatFriendlyDate } from '../../utils/date';
 import { pickForDate } from '../../utils/pick';
-import { colors, radii, spacing, typography, shadow } from '../../theme/theme';
+import { colors, radii, spacing, typography, elevation } from '../../theme/theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Home'>,
@@ -43,60 +44,65 @@ export function HomeScreen({ navigation }: Props) {
         </View>
 
         {dailyDone ? (
-          <View style={styles.quietBlock}>
-            <Text style={styles.quietLabel}>Today, you're holding space for</Text>
-            <Text style={styles.quietFocus}>{daily.focus}</Text>
-          </View>
+          <QuietReveal>
+            <View style={styles.quietBlock}>
+              <Text style={styles.quietLabel}>Today, you're holding space for</Text>
+              <Text style={styles.quietFocus}>{daily.focus}</Text>
+            </View>
+          </QuietReveal>
         ) : (
-          <View style={[styles.card, shadow.soft]}>
-            <Text style={styles.cardEyebrow}>Daily Recenter</Text>
-            <Text style={styles.cardTitle}>A quiet moment before your day begins.</Text>
-            <PrimaryButton
-              label="Begin Today"
-              onPress={() => navigation.navigate('DailyRecenter')}
-              style={styles.cardButton}
-            />
-          </View>
+          <QuietReveal>
+            <View style={[styles.card, elevation.soft]}>
+              <Text style={styles.cardEyebrow}>Daily Recenter</Text>
+              <Text style={styles.cardTitle}>A quiet moment before your day begins.</Text>
+              <PrimaryButton
+                label="Begin Today"
+                onPress={() => navigation.navigate('DailyRecenter')}
+                style={styles.cardButton}
+              />
+            </View>
+          </QuietReveal>
         )}
 
         {dailyDone && !eveningDone ? (
-          <View style={[styles.card, shadow.soft]}>
-            <Text style={styles.cardEyebrow}>Evening Reflection</Text>
-            <Text style={styles.cardTitle}>Take a few quiet minutes to reflect on your day.</Text>
-            <PrimaryButton
-              label="Take a Moment"
-              onPress={() => navigation.navigate('EveningReflection')}
-              style={styles.cardButton}
-            />
-          </View>
+          <QuietReveal>
+            <View style={[styles.card, elevation.soft]}>
+              <Text style={styles.cardEyebrow}>Evening Reflection</Text>
+              <Text style={styles.cardTitle}>Take a few quiet minutes to reflect on your day.</Text>
+              <PrimaryButton
+                label="Take a Moment"
+                onPress={() => navigation.navigate('EveningReflection')}
+                style={styles.cardButton}
+              />
+            </View>
+          </QuietReveal>
         ) : null}
 
         {eveningDone ? (
-          <View style={styles.quietBlock}>
-            <Text style={styles.quietLabel}>This evening, you noticed</Text>
-            <Text style={styles.quietFocus}>{evening.highlight}</Text>
-          </View>
+          <QuietReveal>
+            <View style={styles.quietBlock}>
+              <Text style={styles.quietLabel}>This evening, you noticed</Text>
+              <Text style={styles.quietFocus}>{evening.highlight}</Text>
+            </View>
+          </QuietReveal>
         ) : null}
 
         {dailyDone && eveningDone ? (
-          <Text style={styles.restingMessage}>You've shown up for yourself today. That's enough.</Text>
+          <QuietReveal>
+            <Text style={styles.restingMessage}>You've shown up for yourself today. That's enough.</Text>
+          </QuietReveal>
         ) : null}
 
         {!profile.hasSeenTour ? (
           <View style={styles.tourPrompt}>
             <Text style={styles.tourText}>Take a quick tour?</Text>
             <View style={styles.tourActions}>
-              <PrimaryButton
-                label="Not now"
-                variant="secondary"
-                onPress={dismissTourPrompt}
-                style={styles.tourButton}
-              />
-              <PrimaryButton
-                label="Take the tour"
-                onPress={() => navigation.navigate('Tour')}
-                style={styles.tourButton}
-              />
+              <Pressable onPress={dismissTourPrompt} hitSlop={8}>
+                <Text style={styles.tourLinkMuted}>Not now</Text>
+              </Pressable>
+              <Pressable onPress={() => navigation.navigate('Tour')} hitSlop={8}>
+                <Text style={styles.tourLink}>Take the tour</Text>
+              </Pressable>
             </View>
           </View>
         ) : null}
@@ -143,7 +149,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   quietBlock: {
-    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radii.md,
+    padding: spacing.lg,
   },
   quietLabel: {
     ...typography.label,
@@ -154,24 +162,28 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   restingMessage: {
-    ...typography.bodyMuted,
+    ...typography.quote,
     textAlign: 'center',
     marginTop: spacing.md,
   },
   tourPrompt: {
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: radii.md,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.xs,
   },
   tourText: {
-    ...typography.body,
-    marginBottom: spacing.md,
+    ...typography.bodyMuted,
+    marginBottom: spacing.sm,
   },
   tourActions: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
-  tourButton: {
-    flex: 1,
+  tourLink: {
+    ...typography.body,
+    color: colors.accentDark,
+    fontWeight: '600',
+  },
+  tourLinkMuted: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
 });

@@ -1,27 +1,35 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text } from 'react-native';
 import { colors, radii, spacing } from '../theme/theme';
+import { usePressScale } from '../utils/motion';
 
 interface Props {
   label: string;
   icon?: string;
   selected: boolean;
   onPress: () => void;
+  disabled?: boolean;
 }
 
-export function SelectChip({ label, icon, selected, onPress }: Props) {
+export function SelectChip({ label, icon, selected, onPress, disabled }: Props) {
+  const { scale, onPressIn, onPressOut } = usePressScale();
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.chip, selected ? styles.chipSelected : styles.chipUnselected]}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      hitSlop={4}
-    >
-      {icon ? <Text style={styles.icon}>{icon}</Text> : null}
-      <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
-    </Pressable>
+    <Animated.View style={disabled ? styles.disabled : { transform: [{ scale }] }}>
+      <Pressable
+        onPress={disabled ? undefined : onPress}
+        onPressIn={disabled ? undefined : onPressIn}
+        onPressOut={disabled ? undefined : onPressOut}
+        style={[styles.chip, selected ? styles.chipSelected : styles.chipUnselected]}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected, disabled }}
+        hitSlop={4}
+      >
+        {icon ? <Text style={styles.icon}>{icon}</Text> : null}
+        <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -43,6 +51,9 @@ const styles = StyleSheet.create({
   chipUnselected: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
+  },
+  disabled: {
+    opacity: 0.4,
   },
   icon: {
     fontSize: 16,

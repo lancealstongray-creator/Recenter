@@ -20,6 +20,11 @@ interface Props {
   onBack?: () => void;
   showBack?: boolean;
   onClose: () => void;
+  // Hides the step dots for a beat that isn't really "a step" — the
+  // closing encouragement in Daily Recenter, for example — so "done"
+  // reads visibly different from "still going."
+  hideDots?: boolean;
+  backgroundColor?: string;
 }
 
 export function FlowLayout({
@@ -35,9 +40,11 @@ export function FlowLayout({
   onBack,
   showBack,
   onClose,
+  hideDots,
+  backgroundColor,
 }: Props) {
   return (
-    <ScreenContainer>
+    <ScreenContainer backgroundColor={backgroundColor}>
       <View style={styles.topRow}>
         <Pressable
           onPress={onClose}
@@ -48,7 +55,7 @@ export function FlowLayout({
         >
           <Ionicons name="close" size={20} color={colors.textTertiary} />
         </Pressable>
-        <ProgressDots total={totalSteps} current={step} />
+        {hideDots ? null : <ProgressDots total={totalSteps} current={step} />}
         <View style={styles.closeSpacer} />
       </View>
       <StepFade stepKey={step}>

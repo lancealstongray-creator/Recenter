@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { FlowLayout } from '../../components/FlowLayout';
@@ -7,12 +7,13 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SelectChip } from '../../components/SelectChip';
 import { useApp } from '../../context/AppContext';
+import { useReducedMotion } from '../../utils/motion';
 import { MOODS } from '../../constants/moods';
 import { LIFE_AREAS, getLifeArea } from '../../constants/lifeAreas';
 import { ENCOURAGEMENTS } from '../../constants/encouragements';
 import { todayKey, greetingForNow } from '../../utils/date';
 import { pickForDate } from '../../utils/pick';
-import { colors, radii, spacing, typography } from '../../theme/theme';
+import { colors, radii, spacing, typography, motion } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DailyRecenter'>;
 
@@ -169,6 +170,7 @@ export function DailyRecenterScreen({ navigation }: Props) {
         primaryLabel="Close"
         onPrimaryPress={isFirstSession ? () => setStep(5) : close}
         onClose={close}
+        hideDots
       />
     );
   }
@@ -176,9 +178,9 @@ export function DailyRecenterScreen({ navigation }: Props) {
   return (
     <ScreenContainer>
       <View style={styles.readyCenter}>
-        <View style={styles.readyMark}>
+        <ArrivalMark>
           <Text style={styles.readyMarkGlyph}>✓</Text>
-        </View>
+        </ArrivalMark>
         <Text style={styles.readyTitle} accessibilityRole="header">
           You're ready.
         </Text>
@@ -190,6 +192,37 @@ export function DailyRecenterScreen({ navigation }: Props) {
         <PrimaryButton label="Continue to Home" onPress={close} />
       </View>
     </ScreenContainer>
+  );
+}
+
+// The signature "you're done" moment: scale 0.85→1 + fade, arrive easing,
+// slow duration. No bounce, no overshoot.
+function ArrivalMark({ children }: { children: React.ReactNode }) {
+  const scale = useRef(new Animated.Value(0.85)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const duration = reducedMotion ? motion.duration.base / 2 : motion.duration.slow;
+    scale.setValue(reducedMotion ? 1 : 0.85);
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 1,
+        duration,
+        easing: Easing.bezier(...motion.easing.arrive),
+        useNativeDriver: true,
+      }),
+    ]).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Animated.View style={[styles.readyMark, { opacity, transform: [{ scale }] }]}>{children}</Animated.View>
   );
 }
 

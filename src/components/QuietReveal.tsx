@@ -4,21 +4,20 @@ import { motion } from '../theme/theme';
 import { useReducedMotion } from '../utils/motion';
 
 interface Props {
-  stepKey: string | number;
   children: React.ReactNode;
 }
 
-// Fades content in whenever `stepKey` changes — content quietly arriving
-// into place, not just appearing. The only motion in the step-based
-// flows (onboarding, Daily Recenter, Evening Reflection, Tour).
-export function StepFade({ stepKey, children }: Props) {
+// Fades + drifts content in once, on mount only — never on an incidental
+// re-render. Used for Home's conditional cards so a newly-arrived state
+// (today's focus appearing, the resting message showing up) reads as
+// something new, without ever feeling jumpy while scrolling.
+export function QuietReveal({ children }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const duration = reducedMotion ? motion.duration.base / 2 : motion.duration.base;
-    opacity.setValue(0);
     translateY.setValue(reducedMotion ? 0 : 8);
     Animated.parallel([
       Animated.timing(opacity, {
@@ -33,7 +32,10 @@ export function StepFade({ stepKey, children }: Props) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [stepKey, opacity, translateY, reducedMotion]);
+    // Intentionally runs once — this is a mount-only reveal, not a
+    // response to prop changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return <Animated.View style={{ flex: 1, opacity, transform: [{ translateY }] }}>{children}</Animated.View>;
+  return <Animated.View style={{ opacity, transform: [{ translateY }] }}>{children}</Animated.View>;
 }
