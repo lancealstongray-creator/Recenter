@@ -27,7 +27,7 @@ export interface EveningReflectionEntry {
   completedAt: string; // ISO timestamp
 }
 
-export type FaithPreference = 'faith' | 'general' | 'decide_later' | null;
+export type FaithPreference = 'yes' | 'no' | null;
 
 export interface UserProfile {
   name: string;
@@ -39,4 +39,7 @@ export interface UserProfile {
   faithPreference: FaithPreference;
   notificationsEnabled: boolean;
   draftFocus: string;
+  // Once true, the "Take a quick tour?" prompt never appears
+  // automatically again — only from Profile > Help.
+  hasSeenTour: boolean;
 }

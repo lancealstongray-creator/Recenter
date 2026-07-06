@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { CompositeScreenProps } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { MainTabParamList, RootStackParamList } from '../../navigation/types';
 import { useApp } from '../../context/AppContext';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { SelectChip } from '../../components/SelectChip';
+import { SelectionCard } from '../../components/SelectionCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { LIFE_AREAS } from '../../constants/lifeAreas';
+import { FAITH_PREFERENCES } from '../../constants/faithPreferences';
+import { FaithPreference } from '../../types';
 import { colors, radii, spacing, typography, shadow } from '../../theme/theme';
 
-export function ProfileScreen() {
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Profile'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export function ProfileScreen({ navigation }: Props) {
   const { profile, updateProfile, resetAllData } = useApp();
   const [name, setName] = useState(profile.name);
 
@@ -15,6 +27,10 @@ export function ProfileScreen() {
     const has = profile.lifeAreaIds.includes(id);
     const next = has ? profile.lifeAreaIds.filter((x) => x !== id) : [...profile.lifeAreaIds, id];
     updateProfile({ lifeAreaIds: next });
+  }
+
+  function selectFaithPreference(id: Exclude<FaithPreference, null>) {
+    updateProfile({ faithPreference: id });
   }
 
   function handleNameBlur() {
@@ -71,12 +87,37 @@ export function ProfileScreen() {
         </View>
 
         <View style={[styles.card, shadow.soft]}>
+          <Text style={styles.cardLabel}>Faith-based encouragement</Text>
+          <View style={styles.list}>
+            {FAITH_PREFERENCES.map((option) => (
+              <SelectionCard
+                key={option.id}
+                title={option.label}
+                selected={profile.faithPreference === option.id}
+                onPress={() => selectFaithPreference(option.id)}
+              />
+            ))}
+          </View>
+        </View>
+
+        <View style={[styles.card, shadow.soft]}>
           <Text style={styles.cardLabel}>About Recenter</Text>
           <Text style={styles.aboutText}>
             Recenter is a quiet daily practice — never a performance. There are no streaks, no
             badges, and no reminders about days you missed. Just a space to reconnect with what
             matters, whenever you're ready.
           </Text>
+        </View>
+
+        <View style={[styles.card, shadow.soft]}>
+          <Text style={styles.cardLabel}>Help</Text>
+          <Text style={styles.aboutText}>Take a quick, optional look around the app.</Text>
+          <PrimaryButton
+            label="Take the app tour"
+            variant="secondary"
+            onPress={() => navigation.navigate('Tour')}
+            style={styles.tourButton}
+          />
         </View>
 
         <PrimaryButton label="Reset my data" variant="secondary" onPress={handleReset} style={styles.resetButton} />
@@ -120,8 +161,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
+  list: {
+    gap: spacing.md,
+  },
   aboutText: {
     ...typography.bodyMuted,
+  },
+  tourButton: {
+    marginTop: spacing.md,
   },
   resetButton: {
     marginTop: spacing.xs,

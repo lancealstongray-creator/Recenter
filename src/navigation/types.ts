@@ -3,6 +3,7 @@ export type RootStackParamList = {
   Main: undefined;
   DailyRecenter: undefined;
   EveningReflection: undefined;
+  Tour: undefined;
 };
 
 export type OnboardingStackParamList = {

@@ -18,13 +18,17 @@ type Props = CompositeScreenProps<
 >;
 
 export function HomeScreen({ navigation }: Props) {
-  const { profile, dailyEntries, eveningEntries } = useApp();
+  const { profile, dailyEntries, eveningEntries, updateProfile } = useApp();
   const date = todayKey();
   const daily = dailyEntries[date];
   const evening = eveningEntries[date];
   const dailyDone = Boolean(daily);
   const eveningDone = Boolean(evening);
   const encouragement = useMemo(() => pickForDate(ENCOURAGEMENTS, date), [date]);
+
+  function dismissTourPrompt() {
+    updateProfile({ hasSeenTour: true });
+  }
 
   return (
     <ScreenContainer>
@@ -75,9 +79,26 @@ export function HomeScreen({ navigation }: Props) {
         ) : null}
 
         {dailyDone && eveningDone ? (
-          <Text style={styles.restingMessage}>
-            You've shown up for yourself today. That's enough.
-          </Text>
+          <Text style={styles.restingMessage}>You've shown up for yourself today. That's enough.</Text>
+        ) : null}
+
+        {!profile.hasSeenTour ? (
+          <View style={styles.tourPrompt}>
+            <Text style={styles.tourText}>Take a quick tour?</Text>
+            <View style={styles.tourActions}>
+              <PrimaryButton
+                label="Not now"
+                variant="secondary"
+                onPress={dismissTourPrompt}
+                style={styles.tourButton}
+              />
+              <PrimaryButton
+                label="Take the tour"
+                onPress={() => navigation.navigate('Tour')}
+                style={styles.tourButton}
+              />
+            </View>
+          </View>
         ) : null}
       </ScrollView>
     </ScreenContainer>
@@ -136,5 +157,21 @@ const styles = StyleSheet.create({
     ...typography.bodyMuted,
     textAlign: 'center',
     marginTop: spacing.md,
+  },
+  tourPrompt: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radii.md,
+    padding: spacing.lg,
+  },
+  tourText: {
+    ...typography.body,
+    marginBottom: spacing.md,
+  },
+  tourActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  tourButton: {
+    flex: 1,
   },
 });

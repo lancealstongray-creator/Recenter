@@ -7,24 +7,27 @@ import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 import { DailyRecenterScreen } from '../screens/dailyRecenter/DailyRecenterScreen';
 import { EveningReflectionScreen } from '../screens/eveningReflection/EveningReflectionScreen';
+import { TourScreen } from '../screens/tour/TourScreen';
 import { useApp } from '../context/AppContext';
 import { colors } from '../theme/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { isLoading, profile, justOnboarded, clearJustOnboarded } = useApp();
+  const { isLoading, profile, justOnboarded } = useApp();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
 
   // The moment onboarding finishes, drop straight into the user's real
   // first Morning Session — never a simulated tutorial, never a separate
   // celebration screen. Finishing that session returns to Home as usual.
   useEffect(() => {
+    // DailyRecenterScreen captures `justOnboarded` itself at mount (to know
+    // this is the real first session) and clears it once consumed — so we
+    // only trigger the navigation here, not the clear.
     if (justOnboarded && navigationRef.isReady()) {
       navigationRef.navigate('DailyRecenter');
-      clearJustOnboarded();
     }
-  }, [justOnboarded, navigationRef, clearJustOnboarded]);
+  }, [justOnboarded, navigationRef]);
 
   if (isLoading) {
     return (
@@ -50,6 +53,11 @@ export function RootNavigator() {
         <Stack.Screen
           name="EveningReflection"
           component={EveningReflectionScreen}
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="Tour"
+          component={TourScreen}
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
       </Stack.Navigator>

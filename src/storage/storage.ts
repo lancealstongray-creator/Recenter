@@ -15,6 +15,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   faithPreference: null,
   notificationsEnabled: false,
   draftFocus: '',
+  hasSeenTour: false,
 };
 
 export async function loadProfile(): Promise<UserProfile> {
