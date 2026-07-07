@@ -200,9 +200,12 @@ must never be relaxed without an explicit product decision to ship one.
 
 ## Current Development Baseline
 
-`main` at commit `99d501f` (merge of PR #8) is the official baseline.
-`npx tsc --noEmit`, `npm run lint`, `npm test` (65/65, 8 suites), and
-`npm run build` all pass cleanly against this commit.
+`main` (latest commit) is the official baseline — most recently
+extended with documentation-only commits after Sprint 3's PR #8 merge
+(the cross-functional documentation system under `docs/`, including this
+file). No application code has changed since PR #8. `npx tsc --noEmit`,
+`npm run lint`, `npm test` (65/65, 8 suites), and `npm run build` all
+pass cleanly.
 
 ## Next Engineering Priorities
 

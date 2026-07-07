@@ -1,4 +1,4 @@
-# Decision Log
+# Recenter — Decision Log
 
 A chronological record of explicit product/engineering decisions made
 during this repository's development — not a design or product spec
